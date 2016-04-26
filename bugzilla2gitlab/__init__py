@@ -1,0 +1,52 @@
+import requests
+from xml.etree import ElementTree
+import argparse
+
+class Migrator(object):
+    def __init__(self, bugzilla_base_url):
+        self.bugzilla_url = bugzilla_base_url 
+
+    def move(self, bugzilla_bug_id, gitlab_group, gitlab_project):
+        pass
+
+    def _get_bugzilla_bug(self, bug_id):
+        full_url = "{}{}{}".format(self.bugzilla_url, "show_bug.cgi?ctype=xml&id=", bug_id)
+        response = requests.get(full_url)
+        tree = ElementTree.fromstring(response.content)
+        bug_fields = {}
+        for bug in root:
+            for fields in bug:
+                if fields.tag == "long_desc":
+                    bug_fields["comment"] = field.attrib 
+                else:
+                    bug_fields[field.tag] = field.attrib 
+
+        print bug_fields
+
+
+class BugzillaBug(object):
+    def __init__(self):
+        pass
+
+class Comment(object):
+    def __init__(self, name, timestmap, body):
+        self.name = name
+        self.timestamp = timestamp
+        self.body = body
+
+class Attachment(object):
+    def __init__(self, id, filename):
+        self.id = id
+        self.filename = filename
+
+    def load_attachment():
+        url = "{}{}{}".format(bugzilla_base_url, "attachment.cgi?id=", self.id)
+        self.contents = requests.get(url).contents
+
+
+def main():
+    parser = argparse.ArgumentParser("Recreates Bugzilla bugs as GitLab issues.")
+    parser.add_argument('input_file', metavar='FILEPATH',
+                        help='A file with 1 buzgilla bug_id per line.')
+
+    with open()
