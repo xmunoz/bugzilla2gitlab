@@ -3,9 +3,10 @@ import argparse
 from datetime import datetime
 import os.path
 import yaml
+import sys
+from pprint import pprint
+
 from config import Config
-
-
 from helpers import _perform_request
 
 BASE_DIR = os.path.dirname(__file__)
@@ -15,27 +16,43 @@ config = Config(CONFIG_PATH)
 class MigrationClient(object):
 
     def migrate(self, bug_list):
-
         for bug in bug_list:
             print("Migrating bug {}".format(bug))
             self.migrate_one(bug)
+            break
 
     def migrate_one(self, bugzilla_bug_id):
-        a = Comment("cristina", "hi")
+        fields = self.get_bugzilla_bug(bugzilla_bug_id)
+        it = IssueThread()
+        reporter = config.gitlab_users[config.bugzilla_users[fields["reporter"]]]
+        title = fields["short_desc"]
+        pprint(fields)
+        #description = Issue.make_description(fields[bug_id], reporter, component, version, rep_platform, fields["long_desc"])
+        #it.issue = Issue(reporter, title, description)
+        #it.save()
 
-    def _get_bugzilla_bug(self, bug_id):
-        full_url = "{}{}{}".format(self.bugzilla_url, "show_bug.cgi?ctype=xml&id=", bug_id)
-        response = requests.get(full_url)
+    def get_bugzilla_bug(self, bid):
+        url = "{}?ctype=xml&id={}".format(config.bugzilla_base_url, bid)
+        response = _perform_request(url, "get", paginated=False, json=False)
         tree = ElementTree.fromstring(response.content)
-        bug_fields = {}
-        for bug in root:
+        bug_fields = {
+            "long_desc" : [],
+            "attachment": [],
+            "cc": [],
+        }
+        for bug in tree:
             for fields in bug:
-                if fields.tag == "long_desc":
-                    bug_fields["comment"] = field.attrib
+                if fields.tag in ("long_desc", "attachment"):
+                    new = {}
+                    for data in fields:
+                        new[data.tag] = data.text
+                    bug_fields[fields.tag].append(new)
+                elif fields.tag == "cc":
+                    bug_fields[fields.tag].append(fields.text)
                 else:
-                    bug_fields[field.tag] = field.attrib
+                    bug_fields[fields.tag] = fields.text
 
-        print(bug_fields)
+        return bug_fields
 
 
 class IssueThread(object):
@@ -105,3 +122,13 @@ class Attachment(object):
         attachment = _perform_request(url, "post", headers=self.headers, data=data)
         return attachment
 
+def main():
+    f = sys.argv[1]
+    with open(f, "r") as foo:
+        contents = foo.read().splitlines()
+
+    c = MigrationClient()
+    c.migrate([900])
+
+if __name__ == "__main__":
+    main()

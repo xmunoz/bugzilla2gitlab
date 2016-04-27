@@ -1,6 +1,6 @@
 import requests
 
-def _perform_request(url, method, params={}, headers={}, paginated=True):
+def _perform_request(url, method, params={}, headers={}, paginated=True, json=True):
     '''
     Perform an HTTP request.
     '''
@@ -12,7 +12,10 @@ def _perform_request(url, method, params={}, headers={}, paginated=True):
 
     if not paginated:
         if result.status_code in [200, 201]:
-            return result.json()
+            if json:
+                return result.json()
+            else:
+                return result
         else:
             raise Exception("Failed request {}".format(result.status_code))
 
