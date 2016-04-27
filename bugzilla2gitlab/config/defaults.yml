@@ -1,0 +1,5 @@
+---
+gitlab_base_url: "http://civm02.zib.de/api/v3"
+gitlab_project_id: 2
+gitlab_private_token: "D1XMLyyhDuk2Wx7p8Sxf"
+bugzilla_base_url: "http://www.edom.mi.uni-erlangen.de/bugzilla3/show_bug.cgi?"
