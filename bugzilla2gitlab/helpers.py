@@ -1,14 +1,21 @@
 import requests
 
-def _perform_request(url, method, params={}, headers={}, paginated=True, json=True):
+def _perform_request(url, method, data={}, params={}, headers={}, files={}, paginated=True, json=True):
     '''
     Perform an HTTP request.
     '''
+    print url, method
     func = getattr(requests, method)
 
     # perform paginated requests
-    params.update({"per_page": 100})
-    result = func(url, params=params, headers=headers)
+    if paginated:
+        params.update({"per_page": 100})
+
+    if files:
+        result = func(url, headers=headers, files=files)
+
+    else:
+        result = func(url, params=params, headers=headers, data=data)
 
     if not paginated:
         if result.status_code in [200, 201]:
@@ -17,7 +24,7 @@ def _perform_request(url, method, params={}, headers={}, paginated=True, json=Tr
             else:
                 return result
         else:
-            raise Exception("Failed request {}".format(result.status_code))
+            raise Exception("{} failed requests: {}".format(result.status_code, result.reason))
 
     # paginated request
     final_results = []

@@ -40,7 +40,7 @@ class Config(object):
         print("get {}".format(url))
         result = _perform_request(url, "get", headers=self.headers)
         if result and isinstance(result, list):
-            return result[0]
+            return result[0]["id"]
         else:
             raise Exception("No gitlab account found for user {}".format(username))
 
