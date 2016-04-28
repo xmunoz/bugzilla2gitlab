@@ -67,18 +67,13 @@ class IssueThread(object):
         self.issue.labels.append(fields.get("op_sys"))
         self.issue.status = fields.pop("bug_status")
 
-        created_at_dt = dateutil.parser.parse(fields.pop("creation_ts"))
-        self.issue.created_at = datetime.isoformat(created_at_dt)
-        updated_at_dt = dateutil.parser.parse(fields.pop("delta_ts"))
-        self.issue.updated_at = datetime.isoformat(updated_at_dt)
-
         self.make_description(fields)
 
         self.comments = []
         for c in fields["long_desc"]:
             comment = Comment()
             comment.sudo = config.gitlab_users[config.bugzilla_users[c.pop("who")]]
-            comment.created_at = datetime.isoformat(dateutil.parser.parse(c.pop("bug_when")))
+            comment.body = c.pop("bug_when") + "\n\n"
             if c.get("attachid"):
                 regex = "^Created attachment (\d*)? (.*)$"
                 comment_str = c.pop("thetext")
@@ -89,9 +84,9 @@ class IssueThread(object):
                 assert matches.group(1) == attach_id
                 filename = matches.group(2)
                 attachment_markdown = Attachment(comment.sudo, attach_id, filename).save()
-                comment.body = attachment_markdown
+                comment.body += attachment_markdown
             else:
-                comment.body = c.pop("thetext")
+                comment.body += c.pop("thetext")
 
             self.comments.append(comment)
 
@@ -104,11 +99,14 @@ class IssueThread(object):
         link = "{}show_bug.cgi?id={}".format(config.bugzilla_base_url, bug_id)
         self.issue.description += "| {} | [{}]({}) |\n".format("Bugzilla Link",
                                                                      bug_id, link)
+        self.issue.description += "| {} | {} |\n".format("Created on", fields.pop("creation_ts"))
+
+        if fields.get("resolution"):
+            self.issue.description += "| {} | {} |\n".format("Resolution", fields.pop("resolution"))
+            self.issue.description += "| {} | {} |\n".format("Resolved on", fields.pop("delta_ts"))
 
         self.issue.description += "| {} | {} |\n".format("Version", fields.pop("version"))
         self.issue.description += "| {} | {} |\n".format("OS", fields.pop("op_sys"))
-        if fields.get("resolution"):
-            self.issue.description += "| {} | {} |\n".format("Resolution", fields.pop("resolution"))
         if self.reporter == fields["long_desc"][0]["who"]:
             ext_description += "\n## Extended Description \n"
             ext_description += fields["long_desc"][0]["thetext"]
@@ -138,6 +136,11 @@ class IssueThread(object):
             self.issue.description += "| {} | {} |\n".format("Attachments", ", ".join(attachments))
 
         if ext_description:
+            if self.reporter == "scipweb":
+                ext_description, user_data = ext_description.rsplit("Submitter was ", 1)
+                regex = r"^(\S*)\s.*$"
+                email = re.match(regex, user_data).group(1)
+                self.issue.description += "| {} | {} |\n".format("Reporter", email)
             self.issue.description += ext_description
 
     def save(self):
@@ -150,9 +153,9 @@ class IssueThread(object):
 
 
 class Issue(object):
-    required_fields = ["sudo", "title", "description", "created_at", "status"]
-    data_fields = ["sudo", "title", "description", "created_at", "status", "assignee", "milestone",
-                   "labels", "updated_at"]
+    required_fields = ["sudo", "title", "description", "status"]
+    data_fields = ["sudo", "title", "description", "status", "assignee", "milestone",
+                   "labels"]
 
     def __init__(self):
         self.headers = config.headers
@@ -181,7 +184,6 @@ class Issue(object):
         url = "{}/projects/{}/issues/{}".format(config.gitlab_base_url, config.gitlab_project_id, self.id)
         data = {
             "state_event" : "close",
-            "updated_at": self.updated_at,
         }
         self.headers["sudo"] = self.sudo
         if dry_run:
@@ -191,8 +193,8 @@ class Issue(object):
 
 class Comment(object):
 
-    required_fields = ["sudo", "body", "issue_id", "created_at"]
-    data_fields = ["body", "created_at"]
+    required_fields = ["sudo", "body", "issue_id"]
+    data_fields = ["body"]
 
     def __init__(self):
         self.headers = config.headers
