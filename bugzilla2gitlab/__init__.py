@@ -1,6 +1,4 @@
 from xml.etree import ElementTree
-from datetime import datetime
-import dateutil.parser
 import os.path
 import sys
 import re
@@ -19,7 +17,6 @@ class MigrationClient(object):
         for bug in bug_list:
             print("Migrating bug {}".format(bug))
             self.migrate_one(bug)
-            break
 
     def migrate_one(self, bugzilla_bug_id):
         fields = self.get_bugzilla_bug(bugzilla_bug_id)
@@ -61,10 +58,17 @@ class IssueThread(object):
         self.issue.title = fields.pop("short_desc")
         self.issue.sudo = config.gitlab_users[config.bugzilla_users[self.reporter]]
         self.issue.assignee = config.gitlab_users[config.bugzilla_users[fields.pop("assigned_to")]]
-        self.issue.labels = []
-        self.issue.labels.append("bugzilla")
-        self.issue.labels.append(fields.pop("component"))
-        self.issue.labels.append(fields.get("op_sys"))
+        labels = []
+        labels.append("bugzilla")
+        comp = fields.get("component")
+
+        # only add useful labels
+        if comp != "unspecified":
+            labels.append(fields.pop("component"))
+        if fields.get("op_sys") != "Other":
+            labels.append(fields.get("op_sys"))
+
+        self.issue.labels = ",".join(labels)
         self.issue.status = fields.pop("bug_status")
 
         self.make_description(fields)
@@ -75,15 +79,8 @@ class IssueThread(object):
             comment.sudo = config.gitlab_users[config.bugzilla_users[c.pop("who")]]
             comment.body = c.pop("bug_when") + "\n\n"
             if c.get("attachid"):
-                regex = "^Created attachment (\d*)? (.*)$"
-                comment_str = c.pop("thetext")
-                matches = re.match(regex, comment_str)
-                attach_id = c.pop("attachid")
-                if not matches:
-                    raise Exception("Failed to match comment string: {}".format(comment_str))
-                assert matches.group(1) == attach_id
-                filename = matches.group(2)
-                attachment_markdown = Attachment(comment.sudo, attach_id, filename).save()
+                filename = Attachment.parse_filename(comment.get("thetext"))
+                attachment_markdown = Attachment(comment.sudo, c.get("attachid"), filename).save()
                 comment.body += attachment_markdown
             else:
                 comment.body += c.pop("thetext")
@@ -107,6 +104,7 @@ class IssueThread(object):
 
         self.issue.description += "| {} | {} |\n".format("Version", fields.pop("version"))
         self.issue.description += "| {} | {} |\n".format("OS", fields.pop("op_sys"))
+        self.issue.description += "| {} | {} |\n".format("Platform", fields.pop("rep_platform"))
         if self.reporter == fields["long_desc"][0]["who"]:
             ext_description += "\n## Extended Description \n"
             ext_description += fields["long_desc"][0]["thetext"]
@@ -117,19 +115,12 @@ class IssueThread(object):
         for i in range(0, len(fields["long_desc"])):
             comment = fields["long_desc"][i]
             if comment.get("attachid") and comment.get("who") == self.reporter:
-                regex = "^Created attachment (\d*)\s(.*)$"
-                comment_str = comment.pop("thetext")
-                matches = re.match(regex, comment_str)
-                attach_id = comment.pop("attachid")
-                if not matches:
-                    raise Exception("Failed to match comment string: {}".format(comment_str))
-                assert matches.group(1) == attach_id
-                filename = matches.group(2)
-                attachment_markdown = Attachment(self.reporter, attach_id, filename).save()
+                filename = Attachment.parse_filename(comment.get("thetext"))
+                attachment_markdown = Attachment(self.reporter, comment.get("attachid"), filename).save()
                 attachments.append(attachment_markdown)
                 to_delete.append(i)
 
-        for i in to_delete:
+        for i in reversed(to_delete):
             del fields["long_desc"][i]
 
         if attachments:
@@ -137,10 +128,15 @@ class IssueThread(object):
 
         if ext_description:
             if self.reporter == "scipweb":
-                ext_description, user_data = ext_description.rsplit("Submitter was ", 1)
-                regex = r"^(\S*)\s.*$"
-                email = re.match(regex, user_data).group(1)
-                self.issue.description += "| {} | {} |\n".format("Reporter", email)
+                # try to get reporter email from the body
+                ext_description, part, user_data = ext_description.rpartition("Submitter was ")
+                if part:
+                    regex = r"^(\S*)\s?.*$"
+                    email = re.match(regex, user_data).group(1)
+                    self.issue.description += "| {} | {} |\n".format("Reporter", email)
+            elif config.bugzilla_users[self.reporter] == "ghost":
+                self.issue.description += "| {} | {} |\n".format("Reporter", self.reporter)
+
             self.issue.description += ext_description
 
     def save(self):
@@ -226,6 +222,14 @@ class Attachment(object):
         self.filename = filename
         self.headers = config.headers
 
+    @classmethod
+    def parse_filename(cls, comment):
+        regex = "^Created attachment (\d*)\s?(.*)$"
+        matches = re.match(regex, comment, flags=re.M)
+        if not matches:
+            raise Exception("Failed to match comment string: {}".format(comment))
+        return matches.group(2)
+
     def save(self):
         url = "{}attachment.cgi?id={}".format(config.bugzilla_base_url, self.id)
         result = _perform_request(url, "get", json=False, paginated=False)
@@ -242,7 +246,7 @@ def main():
         contents = foo.read().splitlines()
 
     c = MigrationClient()
-    c.migrate([34])
+    c.migrate(contents)
 
 if __name__ == "__main__":
     main()
