@@ -1,4 +1,5 @@
 import requests
+import dateutil
 
 def _perform_request(url, method, data={}, params={}, headers={}, files={}, paginated=True, json=True):
     '''
@@ -40,3 +41,9 @@ def _perform_request(url, method, data={}, params={}, headers={}, files={}, pagi
 
     return final_results
 
+def markdown_table_row(key, value):
+    return "| {} | {} |\n".format(key, value)
+
+def format_datetime(datestr, formatting):
+    parsed_dt = dateutil.parser.parse(datestr)
+    return parsed_dt.strftime(formatting)

@@ -5,7 +5,7 @@ import re
 from pprint import pprint
 
 from config import Config
-from helpers import _perform_request
+from helpers import _perform_request, markdown_table_row, format_datetime
 
 BASE_DIR = os.path.dirname(__file__)
 CONFIG_PATH = os.path.join(BASE_DIR, "config")
@@ -50,105 +50,23 @@ class MigrationClient(object):
 class IssueThread(object):
 
     def __init__(self, fields):
-        self.parse_fields(fields)
+        self.load_object(fields)
 
-    def parse_fields(self, fields):
-        self.reporter = fields.pop("reporter")
-        self.issue = Issue()
-        self.issue.title = fields.pop("short_desc")
-        self.issue.sudo = config.gitlab_users[config.bugzilla_users[self.reporter]]
-        self.issue.assignee_id = config.gitlab_users[config.bugzilla_users[fields.pop("assigned_to")]]
-        labels = []
-        labels.append("bugzilla")
-        comp = fields.get("component")
-
-        # only add useful labels
-        if comp != "unspecified":
-            labels.append(fields.pop("component"))
-        if fields.get("op_sys") != "Other":
-            labels.append(fields.get("op_sys"))
-
-        self.issue.labels = ",".join(labels)
-        self.issue.status = fields.pop("bug_status")
-
-        self.make_description(fields)
-
+    def load_objects(self, fields):
+        self.issue = Issue(fields)
         self.comments = []
         for c in fields["long_desc"]:
             if c.get("thetext"):
-                comment = Comment()
-                comment.sudo = config.gitlab_users[config.bugzilla_users[c["who"]]]
-                if config.bugzilla_users[c["who"]] == "ghost":
-                    comment.body = "By {} on {}\n\n".format(c["who"], c.pop("bug_when"))
-                else:
-                    comment.body = c.pop("bug_when") + "\n\n"
-                if c.get("attachid"):
-                    filename = Attachment.parse_filename(c.get("thetext"))
-                    attachment_markdown = Attachment(comment.sudo, c.get("attachid"), filename).save()
-                    comment.body += attachment_markdown
-                else:
-                    comment.body += c.pop("thetext")
-
-                self.comments.append(comment)
-
-    def make_description(self, fields):
-        ext_description = ""
-        self.issue.description = "|||\n"
-        self.issue.description += "| --- | --- |\n"
-
-        bug_id = fields.pop("bug_id")
-        link = "{}show_bug.cgi?id={}".format(config.bugzilla_base_url, bug_id)
-        self.issue.description += "| {} | [{}]({}) |\n".format("Bugzilla Link",
-                                                                     bug_id, link)
-        self.issue.description += "| {} | {} |\n".format("Created on", fields.pop("creation_ts"))
-
-        if fields.get("resolution"):
-            self.issue.description += "| {} | {} |\n".format("Resolution", fields.pop("resolution"))
-            self.issue.description += "| {} | {} |\n".format("Resolved on", fields.pop("delta_ts"))
-
-        self.issue.description += "| {} | {} |\n".format("Version", fields.pop("version"))
-        self.issue.description += "| {} | {} |\n".format("OS", fields.pop("op_sys"))
-        self.issue.description += "| {} | {} |\n".format("Platform", fields.pop("rep_platform"))
-        if self.reporter == fields["long_desc"][0]["who"] and fields["long_desc"][0]["thetext"]:
-            ext_description += "\n## Extended Description \n"
-            ext_description += fields["long_desc"][0]["thetext"]
-            del fields["long_desc"][0]
-
-        attachments = []
-        to_delete = []
-        for i in range(0, len(fields["long_desc"])):
-            comment = fields["long_desc"][i]
-            if comment.get("attachid") and comment.get("who") == self.reporter:
-                filename = Attachment.parse_filename(comment.get("thetext"))
-                attachment_markdown = Attachment(self.reporter, comment.get("attachid"), filename).save()
-                attachments.append(attachment_markdown)
-                to_delete.append(i)
-
-        for i in reversed(to_delete):
-            del fields["long_desc"][i]
-
-        if attachments:
-            self.issue.description += "| {} | {} |\n".format("Attachments", ", ".join(attachments))
-
-        if ext_description:
-            if self.reporter == "scipweb":
-                # try to get reporter email from the body
-                ext_description, part, user_data = ext_description.rpartition("Submitter was ")
-                if part:
-                    regex = r"^(\S*)\s?.*$"
-                    email = re.match(regex, user_data, flags=re.M).group(1)
-                    self.issue.description += "| {} | {} |\n".format("Reporter", email)
-            elif config.bugzilla_users[self.reporter] == "ghost":
-                self.issue.description += "| {} | {} |\n".format("Reporter", self.reporter)
-
-            self.issue.description += ext_description
+                self.comments.append(Comment(c))
 
     def save(self):
         self.issue.save()
+
         for comment in self.comments:
             comment.issue_id = self.issue.id
             comment.save()
-        if self.issue.status == "RESOLVED":
+
+        if self.issue.status in config.closed_statuses:
             self.issue.close()
 
 
@@ -157,8 +75,92 @@ class Issue(object):
     data_fields = ["sudo", "title", "description", "status", "assignee_id", "milestone",
                    "labels"]
 
-    def __init__(self):
+    def __init__(self, bugzilla_fields):
         self.headers = config.headers
+        self.load_fields(bugzilla_fields)
+
+    def load_fields(self, fields):
+        self.title = fields["short_desc"]
+        self.sudo = config.gitlab_users[config.bugzilla_users[fields["reporter"]]]
+        self.assignee_id = config.gitlab_users[config.bugzilla_users[fields["assigned_to"]]]
+        self.status = fields["bug_status"]
+        self.create_labels(fields["component"], fields.get("op_sys"))
+        self.create_description(fields)
+
+    def create_labels(self, component, operating_system):
+        labels = []
+        labels.append("bugzilla")
+
+        component_label = config.component_mappings.get(component)
+        if component_label:
+            labels.append(component_label)
+
+        if operating_system:
+            labels.append(operating_system)
+
+        self.labels = ",".join(labels)
+
+    def create_description(self, fields):
+        ext_description = ""
+
+        # markdown table header
+        self.description = markdown_table_row("", "")
+        self.description += markdown_table_row("---", "---")
+
+        bug_id = fields.pop("bug_id")
+        link = "{}show_bug.cgi?id={}".format(config.bugzilla_base_url, bug_id)
+        self.description += markdown_table_row("Bugzilla Link",
+                                               "[{}]({})".format(bug_id, link))
+
+        formatted_dt = format_datetime(fields.pop("creation_ts"), "%b %d, %Y %H:%M")
+        self.description += markdown_table_row("Created on", formatted_dt)
+
+        if fields.get("resolution"):
+            self.description += markdown_table_row("Resolution", fields.pop("resolution"))
+            self.description += markdown_table_row("Resolved on", fields.pop("delta_ts"))
+
+        self.description += markdown_table_row("Version", fields.pop("version"))
+        self.description += markdown_table_row("OS", fields.pop("op_sys"))
+        self.description += markdown_table_row("Architecture", fields.pop("rep_platform"))
+
+        # add first comment to the issue description
+        if fields["reporter"] == fields["long_desc"][0]["who"] and fields["long_desc"][0]["thetext"]:
+            ext_description += "\n## Extended Description \n"
+            ext_description += "\n".join(fields["long_desc"][0]["thetext"].split("\n"))
+            del fields["long_desc"][0]
+
+        attachments = []
+        to_delete = []
+        for i in range(0, len(fields["long_desc"])):
+            comment = fields["long_desc"][i]
+            # any attachments from the reporter in comments should also go in the issue description
+            if comment.get("attachid") and comment.get("who") == fields["reporter"]:
+                filename = Attachment.parse_filename(comment.get("thetext"))
+                attachment_markdown = Attachment(comment.get("attachid"), filename).save()
+                attachments.append(attachment_markdown)
+                to_delete.append(i)
+
+        # delete comments that have already added to the issue description
+        for i in reversed(to_delete):
+            del fields["long_desc"][i]
+
+        if attachments:
+            self.description += markdown_table_row("Attachments", ", ".join(attachments))
+
+        if ext_description:
+            if self.reporter == "scipweb":
+                # try to get reporter email from the body
+                description, part, user_data = ext_description.rpartition("Submitter was ")
+                # partition found matching string
+                if part:
+                    regex = r"^(\S*)\s?.*$"
+                    email = re.match(regex, user_data, flags=re.M).group(1)
+                    self.description += markdown_table_row("Reporter", email)
+            elif config.bugzilla_users[fields["reporter"]] == "ghost":
+                self.description += markdown_table_row("Reporter", self.reporter)
+
+            self.description += ext_description
+
 
     def validate(self):
         for field in self.required_fields:
@@ -196,8 +198,27 @@ class Comment(object):
     required_fields = ["sudo", "body", "issue_id"]
     data_fields = ["body"]
 
-    def __init__(self):
+    def __init__(self, bugzilla_fields):
         self.headers = config.headers
+        self.load_fields(bugzilla_fields)
+
+    def load_fields(self, fields):
+        for c in fields["long_desc"]:
+            if c.get("thetext"):
+                comment = Comment()
+                comment.sudo = config.gitlab_users[config.bugzilla_users[c["who"]]]
+                if config.bugzilla_users[c["who"]] == "ghost":
+                    comment.body = "By {} on {}\n\n".format(c["who"], c.pop("bug_when"))
+                else:
+                    comment.body = c.pop("bug_when") + "\n\n"
+                if c.get("attachid"):
+                    filename = Attachment.parse_filename(c.get("thetext"))
+                    attachment_markdown = Attachment(c.get("attachid"), filename).save()
+                    comment.body += attachment_markdown
+                else:
+                    comment.body += c.pop("thetext")
+
+                self.comments.append(comment)
 
     def validate(self):
         for field in self.required_fields:
@@ -221,7 +242,7 @@ class Comment(object):
 
 
 class Attachment(object):
-    def __init__(self, user, bugzilla_attachment_id, filename):
+    def __init__(self, bugzilla_attachment_id, filename):
         self.id = bugzilla_attachment_id
         self.filename = filename
         self.headers = config.headers
@@ -250,7 +271,7 @@ def main():
         contents = foo.read().splitlines()
 
     c = MigrationClient()
-    c.migrate(contents)
+    c.migrate(contents[:10])
 
 if __name__ == "__main__":
     main()

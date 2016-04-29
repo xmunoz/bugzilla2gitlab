@@ -5,34 +5,45 @@ from helpers import _perform_request
 
 class Config(object):
     def __init__(self, path):
+        self._load_defaults()
+        self._load_closed_statuses()
+        self._load_user_id_cache()
+        self._load_component_mappings()
+
+    def _load_defaults(self):
         with open(os.path.join(path, "defaults.yml")) as f:
             config = yaml.load(f)
 
         for key in config:
             setattr(self, key, config[key])
 
-        with open(os.path.join(path, "user_mappings.yml")) as f:
-            user_mapping = yaml.load(f)
-
         self._load_default_headers()
-        self._load_user_id_cache(user_mapping)
 
     def _load_default_headers(self):
         setattr(self, "headers", {"private-token": self.gitlab_private_token})
 
-    def _load_user_id_cache(self, user_mapping):
+    def _load_closed_statuses(self):
+        with open(os.path.join(path, "closed_statuses.yml")) as f:
+            statuses = yaml.load(f)
+        self.closed_statuses = statuses
+
+    def _load_user_id_cache(self):
         '''
         Load cache of gitlab usernames and ids
         '''
         print("Loading user cache...")
-        bugzilla_users = user_mapping
+        with open(os.path.join(path, "user_mappings.yml")) as f:
+            bugzilla_mapping = yaml.load(f)
+
         gitlab_users = {}
-        for user in user_mapping:
-            gitlab_username = user_mapping[user]
+        for user in bugzilla_mapping:
+            gitlab_username = bugzilla_mapping[user]
             uid = self._get_user_id(gitlab_username)
             gitlab_users[gitlab_username] = uid
 
+        # bugzilla_username: gitlab_username
         self.bugzilla_users = bugzilla_users
+        # gitlab_username: gitlab_userid
         self.gitlab_users = gitlab_users
 
     def _get_user_id(self, username):
@@ -43,4 +54,10 @@ class Config(object):
             return result[0]["id"]
         else:
             raise Exception("No gitlab account found for user {}".format(username))
+
+    def _load_component_mappings(self):
+        with open(os.path.join(path, "component_mappings.yml")) as f:
+            component_mappings = yaml.load(f)
+
+        self.component_mappings = component_mappings
 

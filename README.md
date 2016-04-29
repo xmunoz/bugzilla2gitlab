@@ -6,37 +6,9 @@ The list of bug_ids to be migrated can be found in `bugs.txt`. This file contain
 
 # Mappings
 
-Please see `config/users_mappings.yml` for the mappings between bugzilla and gitlab users. Users with the designation "ghost" are no longer with ZIB or simply machine users, and will leave comments under a generic "ghost" account.
+Please see `config/users_mappings.yml` for the mappings between bugzilla and gitlab users. Users with the designation "ghost" are no longer with ZIB or simply machine users (e.g. scipweb user), and will leave comments under a generic "ghost" account.
 
-Here is a proposed mapping of Bugzilla fields to GitLab's issue fields. There might be some fields whose value we don't care to preserve, or other that might need to be stored in
-
-| Bugzilla field name | GitLab issue fieldname |
-|---------------------|------------------------|
-|*Issues*||
-| `bug_id` | metadata section of `description` |
-|`creation_ts` | metadata section of `description` |
-|`short_desc` | `title` |
-|`product` "SCIP" | repository of the issue |
-|`version` "2.1.1"| metadata section of  `description`|
-|`component` "cons-quadratic"| `labels` or `description`|
-|`rep_platform` "x86-64-Bit"| `description` |
-|`op_sys` "Linux"| `description` |
-|`priority` "P3"||
-|`severity` "minor"||
-|`reporter`| request maker, or metadata section of  `description`|
-|`assigned_to `|`assignee_id`|
-|`cc`| metadata section of  `description`|
-|`estimated_time`||
-|`remaining_time`||
-|`actual_time`||
-|`cf_rel`||
-|*comments* ||
-|`long_desc`| issue note|
-|`long_desc.commentid`| note `body` metadata|
-|`long_desc.who`| request maker |
-|`long_desc.bug_when`| http://doc.gitlab.com/ce/api/notes.html#create-new-issue-note metadata|
-|`long_desc.thetext`|note `body`|
-|`attachment`e.g. a file|????|
+Components are also mapped to gitlab issue labels in `config/component_mappings.yml`.
 
 
 # Tools
