@@ -57,7 +57,7 @@ class IssueThread(object):
         self.issue = Issue()
         self.issue.title = fields.pop("short_desc")
         self.issue.sudo = config.gitlab_users[config.bugzilla_users[self.reporter]]
-        self.issue.assignee = config.gitlab_users[config.bugzilla_users[fields.pop("assigned_to")]]
+        self.issue.assignee_id = config.gitlab_users[config.bugzilla_users[fields.pop("assigned_to")]]
         labels = []
         labels.append("bugzilla")
         comp = fields.get("component")
@@ -75,17 +75,21 @@ class IssueThread(object):
 
         self.comments = []
         for c in fields["long_desc"]:
-            comment = Comment()
-            comment.sudo = config.gitlab_users[config.bugzilla_users[c.pop("who")]]
-            comment.body = c.pop("bug_when") + "\n\n"
-            if c.get("attachid"):
-                filename = Attachment.parse_filename(comment.get("thetext"))
-                attachment_markdown = Attachment(comment.sudo, c.get("attachid"), filename).save()
-                comment.body += attachment_markdown
-            else:
-                comment.body += c.pop("thetext")
+            if c.get("thetext"):
+                comment = Comment()
+                comment.sudo = config.gitlab_users[config.bugzilla_users[c["who"]]]
+                if config.bugzilla_users[c["who"]] == "ghost":
+                    comment.body = "By {} on {}\n\n".format(c["who"], c.pop("bug_when"))
+                else:
+                    comment.body = c.pop("bug_when") + "\n\n"
+                if c.get("attachid"):
+                    filename = Attachment.parse_filename(c.get("thetext"))
+                    attachment_markdown = Attachment(comment.sudo, c.get("attachid"), filename).save()
+                    comment.body += attachment_markdown
+                else:
+                    comment.body += c.pop("thetext")
 
-            self.comments.append(comment)
+                self.comments.append(comment)
 
     def make_description(self, fields):
         ext_description = ""
@@ -105,7 +109,7 @@ class IssueThread(object):
         self.issue.description += "| {} | {} |\n".format("Version", fields.pop("version"))
         self.issue.description += "| {} | {} |\n".format("OS", fields.pop("op_sys"))
         self.issue.description += "| {} | {} |\n".format("Platform", fields.pop("rep_platform"))
-        if self.reporter == fields["long_desc"][0]["who"]:
+        if self.reporter == fields["long_desc"][0]["who"] and fields["long_desc"][0]["thetext"]:
             ext_description += "\n## Extended Description \n"
             ext_description += fields["long_desc"][0]["thetext"]
             del fields["long_desc"][0]
@@ -132,7 +136,7 @@ class IssueThread(object):
                 ext_description, part, user_data = ext_description.rpartition("Submitter was ")
                 if part:
                     regex = r"^(\S*)\s?.*$"
-                    email = re.match(regex, user_data).group(1)
+                    email = re.match(regex, user_data, flags=re.M).group(1)
                     self.issue.description += "| {} | {} |\n".format("Reporter", email)
             elif config.bugzilla_users[self.reporter] == "ghost":
                 self.issue.description += "| {} | {} |\n".format("Reporter", self.reporter)
@@ -150,7 +154,7 @@ class IssueThread(object):
 
 class Issue(object):
     required_fields = ["sudo", "title", "description", "status"]
-    data_fields = ["sudo", "title", "description", "status", "assignee", "milestone",
+    data_fields = ["sudo", "title", "description", "status", "assignee_id", "milestone",
                    "labels"]
 
     def __init__(self):
