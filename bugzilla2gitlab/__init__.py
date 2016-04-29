@@ -50,7 +50,7 @@ class MigrationClient(object):
 class IssueThread(object):
 
     def __init__(self, fields):
-        self.load_object(fields)
+        self.load_objects(fields)
 
     def load_objects(self, fields):
         self.issue = Issue(fields)
@@ -95,7 +95,7 @@ class Issue(object):
         if component_label:
             labels.append(component_label)
 
-        if operating_system:
+        if operating_system and operating_system != "Other":
             labels.append(operating_system)
 
         self.labels = ",".join(labels)
@@ -117,7 +117,9 @@ class Issue(object):
 
         if fields.get("resolution"):
             self.description += markdown_table_row("Resolution", fields.pop("resolution"))
-            self.description += markdown_table_row("Resolved on", fields.pop("delta_ts"))
+            self.description += markdown_table_row("Resolved on",
+                                                   format_datetime(fields.pop("delta_ts"),
+                                                                   "%b %d, %Y %H:%M"))
 
         self.description += markdown_table_row("Version", fields.pop("version"))
         self.description += markdown_table_row("OS", fields.pop("op_sys"))
@@ -126,7 +128,7 @@ class Issue(object):
         # add first comment to the issue description
         if fields["reporter"] == fields["long_desc"][0]["who"] and fields["long_desc"][0]["thetext"]:
             ext_description += "\n## Extended Description \n"
-            ext_description += "\n".join(fields["long_desc"][0]["thetext"].split("\n"))
+            ext_description += "\n\n".join(re.split("\n*", fields["long_desc"][0]["thetext"]))
             del fields["long_desc"][0]
 
         attachments = []
@@ -148,7 +150,7 @@ class Issue(object):
             self.description += markdown_table_row("Attachments", ", ".join(attachments))
 
         if ext_description:
-            if self.reporter == "scipweb":
+            if fields["reporter"] == "scipweb":
                 # try to get reporter email from the body
                 description, part, user_data = ext_description.rpartition("Submitter was ")
                 # partition found matching string
@@ -157,7 +159,7 @@ class Issue(object):
                     email = re.match(regex, user_data, flags=re.M).group(1)
                     self.description += markdown_table_row("Reporter", email)
             elif config.bugzilla_users[fields["reporter"]] == "ghost":
-                self.description += markdown_table_row("Reporter", self.reporter)
+                self.description += markdown_table_row("Reporter", fields["reporter"])
 
             self.description += ext_description
 
@@ -202,23 +204,22 @@ class Comment(object):
         self.headers = config.headers
         self.load_fields(bugzilla_fields)
 
-    def load_fields(self, fields):
-        for c in fields["long_desc"]:
-            if c.get("thetext"):
-                comment = Comment()
-                comment.sudo = config.gitlab_users[config.bugzilla_users[c["who"]]]
-                if config.bugzilla_users[c["who"]] == "ghost":
-                    comment.body = "By {} on {}\n\n".format(c["who"], c.pop("bug_when"))
-                else:
-                    comment.body = c.pop("bug_when") + "\n\n"
-                if c.get("attachid"):
-                    filename = Attachment.parse_filename(c.get("thetext"))
-                    attachment_markdown = Attachment(c.get("attachid"), filename).save()
-                    comment.body += attachment_markdown
-                else:
-                    comment.body += c.pop("thetext")
+    def load_fields(self, c):
+        if c.get("thetext"):
+            self.sudo = config.gitlab_users[config.bugzilla_users[c["who"]]]
+            if config.bugzilla_users[c["who"]] == "ghost":
+                self.body = "By {} on {}\n\n".format(c["who"],
+                                                     format_datetime(c.pop("bug_when"),
+                                                                     "%b %d, %Y %H:%M"))
+            else:
+                self.body = format_datetime(c.pop("bug_when"), "%b %d, %Y %H:%M") + "\n\n"
+            if c.get("attachid"):
+                filename = Attachment.parse_filename(c.get("thetext"))
+                attachment_markdown = Attachment(c.get("attachid"), filename).save()
+                self.body += attachment_markdown
+            else:
+                self.body += c.pop("thetext")
 
-                self.comments.append(comment)
 
     def validate(self):
         for field in self.required_fields:
@@ -271,7 +272,7 @@ def main():
         contents = foo.read().splitlines()
 
     c = MigrationClient()
-    c.migrate(contents[:10])
+    c.migrate(contents)
 
 if __name__ == "__main__":
     main()

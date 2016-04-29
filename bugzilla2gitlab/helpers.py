@@ -1,5 +1,5 @@
 import requests
-import dateutil
+import dateutil.parser
 
 def _perform_request(url, method, data={}, params={}, headers={}, files={}, paginated=True, json=True):
     '''
