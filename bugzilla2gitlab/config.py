@@ -1,5 +1,4 @@
 import yaml
-import requests
 import os
 from helpers import _perform_request
 

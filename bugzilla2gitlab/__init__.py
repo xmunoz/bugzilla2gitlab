@@ -1,8 +1,6 @@
 from xml.etree import ElementTree
 import os.path
-import sys
 import re
-from pprint import pprint
 
 from config import Config
 from helpers import _perform_request, markdown_table_row, format_datetime
@@ -13,14 +11,14 @@ config = Config(CONFIG_PATH)
 
 class MigrationClient(object):
 
-    def migrate(self, bug_list):
+    def migrate(self, bug_list, dry_run=False):
         for bug in bug_list:
             print("Migrating bug {}".format(bug))
-            self.migrate_one(bug)
+            self.migrate_one(bug, dry_run=dry_run)
 
-    def migrate_one(self, bugzilla_bug_id):
+    def migrate_one(self, bugzilla_bug_id, dry_run=False):
         fields = self.get_bugzilla_bug(bugzilla_bug_id)
-        it = IssueThread(fields)
+        it = IssueThread(fields, dry_run=dry_run)
         it.save()
 
     def get_bugzilla_bug(self, bid):
@@ -49,15 +47,16 @@ class MigrationClient(object):
 
 class IssueThread(object):
 
-    def __init__(self, fields):
+    def __init__(self, fields, dry_run=False):
+        self.dry_run = dry_run
         self.load_objects(fields)
 
     def load_objects(self, fields):
-        self.issue = Issue(fields)
+        self.issue = Issue(fields, dry_run=self.dry_run)
         self.comments = []
         for c in fields["long_desc"]:
             if c.get("thetext"):
-                self.comments.append(Comment(c))
+                self.comments.append(Comment(c, dry_run=self.dry_run))
 
     def save(self):
         self.issue.save()
@@ -75,8 +74,9 @@ class Issue(object):
     data_fields = ["sudo", "title", "description", "status", "assignee_id", "milestone",
                    "labels"]
 
-    def __init__(self, bugzilla_fields):
+    def __init__(self, bugzilla_fields, dry_run=False):
         self.headers = config.headers
+        self.dry_run = dry_run
         self.load_fields(bugzilla_fields)
 
     def load_fields(self, fields):
@@ -138,7 +138,8 @@ class Issue(object):
             # any attachments from the reporter in comments should also go in the issue description
             if comment.get("attachid") and comment.get("who") == fields["reporter"]:
                 filename = Attachment.parse_filename(comment.get("thetext"))
-                attachment_markdown = Attachment(comment.get("attachid"), filename).save()
+                attachment_markdown = Attachment(comment.get("attachid"), filename,
+                                                 dry_run=self.dry_run).save()
                 attachments.append(attachment_markdown)
                 to_delete.append(i)
 
@@ -177,22 +178,27 @@ class Issue(object):
         url = "{}/projects/{}/issues".format(config.gitlab_base_url, config.gitlab_project_id)
         data = {k:v for k,v in self.__dict__.iteritems() if k in self.data_fields}
         self.headers["sudo"] = self.sudo
-        if dry_run:
-            pprint(data)
-            return 3
+
+        if self.dry_run:
+            print url, "dry_run"
+            self.id = 5
+            return
+
         response = _perform_request(url, "post", headers=self.headers, data=data, json=True, paginated=False)
         self.id = response["id"]
 
 
-    def close(self, dry_run=False):
+    def close(self):
         url = "{}/projects/{}/issues/{}".format(config.gitlab_base_url, config.gitlab_project_id, self.id)
         data = {
             "state_event" : "close",
         }
         self.headers["sudo"] = self.sudo
-        if dry_run:
-            pprint(data)
+
+        if self.dry_run:
+            print url, "dry_run"
             return
+
         _perform_request(url, "put", headers=self.headers, data=data)
 
 class Comment(object):
@@ -200,25 +206,25 @@ class Comment(object):
     required_fields = ["sudo", "body", "issue_id"]
     data_fields = ["body"]
 
-    def __init__(self, bugzilla_fields):
+    def __init__(self, bugzilla_fields, dry_run=False):
         self.headers = config.headers
+        self.dry_run = dry_run
         self.load_fields(bugzilla_fields)
 
     def load_fields(self, c):
-        if c.get("thetext"):
-            self.sudo = config.gitlab_users[config.bugzilla_users[c["who"]]]
-            if config.bugzilla_users[c["who"]] == "ghost":
-                self.body = "By {} on {}\n\n".format(c["who"],
-                                                     format_datetime(c.pop("bug_when"),
-                                                                     "%b %d, %Y %H:%M"))
-            else:
-                self.body = format_datetime(c.pop("bug_when"), "%b %d, %Y %H:%M") + "\n\n"
-            if c.get("attachid"):
-                filename = Attachment.parse_filename(c.get("thetext"))
-                attachment_markdown = Attachment(c.get("attachid"), filename).save()
-                self.body += attachment_markdown
-            else:
-                self.body += c.pop("thetext")
+        self.sudo = config.gitlab_users[config.bugzilla_users[c["who"]]]
+        if config.bugzilla_users[c["who"]] == "ghost":
+            self.body = "By {} on {}\n\n".format(c["who"],
+                                                 format_datetime(c.pop("bug_when"),
+                                                                 "%b %d, %Y %H:%M"))
+        else:
+            self.body = format_datetime(c.pop("bug_when"), "%b %d, %Y %H:%M") + "\n\n"
+        if c.get("attachid"):
+            filename = Attachment.parse_filename(c.get("thetext"))
+            attachment_markdown = Attachment(c.get("attachid"), filename, self.dry_run).save()
+            self.body += attachment_markdown
+        else:
+            self.body += c.pop("thetext")
 
 
     def validate(self):
@@ -229,21 +235,24 @@ class Comment(object):
                 return False
         return True
 
-    def save(self, dry_run=False):
+    def save(self):
         if not self.validate():
             raise Exception("Validation error")
 
         self.headers["sudo"] = self.sudo
         url = "{}/projects/{}/issues/{}/notes".format(config.gitlab_base_url, config.gitlab_project_id, self.issue_id)
         data = {k:v for k,v in self.__dict__.iteritems() if k in self.data_fields}
-        if dry_run:
-            pprint(data)
+
+        if self.dry_run:
+            print url, "dry_run"
             return
+
         _perform_request(url, "post", headers=self.headers, data=data, json=True, paginated=False)
 
 
 class Attachment(object):
-    def __init__(self, bugzilla_attachment_id, filename):
+    def __init__(self, bugzilla_attachment_id, filename, dry_run=False):
+        self.dry_run = dry_run
         self.id = bugzilla_attachment_id
         self.filename = filename
         self.headers = config.headers
@@ -262,17 +271,12 @@ class Attachment(object):
 
         url = "{}/projects/{}/uploads".format(config.gitlab_base_url, config.gitlab_project_id)
         f = {"file": (self.filename, result.content)}
+
+        if self.dry_run:
+            print url, "dry_run"
+            return "[attachment]({})".format(self.filename)
+
         attachment = _perform_request(url, "post", headers=self.headers, files=f, json=True,
                                       paginated=False)
         return attachment["markdown"]
 
-def main():
-    f = sys.argv[1]
-    with open(f, "r") as foo:
-        contents = foo.read().splitlines()
-
-    c = MigrationClient()
-    c.migrate(contents)
-
-if __name__ == "__main__":
-    main()
