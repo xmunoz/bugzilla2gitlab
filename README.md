@@ -5,7 +5,7 @@
 Information about run options:
 
 ```
-python bin/run_migrator -h
+python bin/run_migrator.py -h
 ```
 
 Ensure that the configuration for the source and target instances is set correctly in `bugzilla2gitlab/config/defaults.yml`.
