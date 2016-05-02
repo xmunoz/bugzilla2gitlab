@@ -1,5 +1,15 @@
 # bugzilla2gitlab
 
+## Usage
+
+Information about run options:
+
+```
+python bin/run_migrator -h
+```
+
+Ensure that the configuration for the source and target instances is set correctly in `bugzilla2gitlab/config/defaults.yml`.
+
 ## Rationale
 
 Currently, our source code is hosted with the GitLab front-end. In an effort bring our bugs and the code closer together, the idea to migrate away from Bugzilla to the GitLab issues was prosed by members of the MOM group. The first phase of this project was a new bug reporting form on [scip.zib.de](http://scip.zib.de/bugs.php) that automatically creates [issues in the SCIP repository](https://git.zib.de/integer/scip/issue). The second phase is moving all of our bugs from Bugzilla into Gitlab Issues with this script.
