@@ -1,0 +1,34 @@
+---
+# If true, don't execute any put or post requests. Still execute get requests though.
+dry_run: true
+
+# gitlab api base url without trailing slash
+gitlab_base_url: "https://git.example.com/api/v3"
+
+# The gitlab project id
+gitlab_project_id: 5
+
+# The private token of the gitlab Administrator. This program needs GitLab sudo to run.
+# Read more about sudo here:
+# http://docs.gitlab.com/ce/api/#sudo
+gitlab_private_token: "SUPERSECRETTOKEN"
+
+# bugzilla base url without trailing slash
+bugzilla_base_url: "https://landfill.bugzilla.org/bugzilla-5.0-branch"
+
+# The way to format datetime strings in GitLab.
+datetime_format_string: "%b %d, %Y %H:%M"
+
+# Generic bugzilla user that bug reporting forms would create bugs as
+# Important to perform better formatting for the Issue description
+# Optional
+bugzilla_auto_reporter: "scipweb"
+
+# GitLab user for misc or old bugzilla users that don't have GitLab accounts
+bugzilla_misc_user: "bugzilla"
+
+# Default label(s) to add to all migrated bugs
+# Optional
+default_gitlab_labels:
+    - "bugzilla"
+    - "legacy"

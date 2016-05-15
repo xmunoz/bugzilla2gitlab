@@ -1,0 +1,8 @@
+# list all of the bugzilla components, and their desired gitlab issue label
+branching-framework: branch
+Build Envrionment: makefile
+conflict: core
+cons-bivariate: cons
+Documentation: documentation
+fileio: core
+statistics: core
