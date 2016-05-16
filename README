@@ -1,0 +1,136 @@
+//travis-ci.org/xmunoz/bugzilla2gitlab.svg?branch=master)](https://travis-ci.org/xmunoz/bugzilla2gitlab)
+# bugzilla2gitlab
+
+Introduction
+------------
+
+Are you relying on a decades-old bugzilla installation for issue
+tracking? Do you want to move to a more modern issue tracker, but are
+afraid to lose the bug history? Do you have more important things to
+worry about than a Bugzilla to GitLab issue migration?
+
+If you answered yes to the above 3 questions, then bugzilla2gitlab might
+be for you.
+
+Installation
+------------
+
+This library is very much under development. That said, if you like to
+feel the wind in your hair, simply ``pip install bugzilla2gitlab``.
+
+More than likely, you will need to roll up your sleaves and hack on the
+package to achieve a migration that you are happy with. In this case:
+
+::
+
+    git clone git@github.com:xmunoz/bugzilla2gitlab.git
+    cd bugzilla2gitlab
+    virtualenv venv
+    source venv/bin/activate
+    pip install -r requirements.txt
+
+Usage
+-----
+
+bugzilla2gitlab synchronously migrates a user-defined list of bugzilla
+bugs to a single GitLab project. There are two interfaces for this
+library. The command line usage:
+
+::
+
+    $  bin/run_migrator.py -h
+    usage: run_migrator.py [-h] [FILE] [CONFIG_DIRECTORY]
+
+    Migrate bugs from bugzilla to gitlab.
+
+    positional arguments:
+      [FILE]              A file containing a list of bugzilla bug numbers to
+                          migrate, one per line.
+      [CONFIG_DIRECTORY]  The directory containing the required configuration
+                          files.
+
+    optional arguments:
+      -h, --help          show this help message and exit
+
+This package can also be used as a python module.
+
+::
+
+    from bugzilla2gitlab import Migrator
+
+    client = Migrator(config_path="/path/to/config")
+    bugs_list = [1,2,3,4,5,6,7]
+    client.migrate(bugs_list)
+
+Configuration
+-------------
+
+To begin using bugzilla2gitlab, the following list of configuration
+files is required:
+
+-  ``defaults.yml``: Core default values used throughout the modules.
+-  ``user_mappings.yml``: key, value pairs of Bugzilla usernames to
+   GitLab users
+-  ``component_mappings.yml``: key, value pairs of Bugzilla components
+   to Gitlab labels
+
+Samples of all of these files can be found in
+``tests/test_data/config``.
+
+bugzilla2gitlab creates issues and comments in GitLab with the user
+accounts specified in ``user_mappings.yml``, perserving the integrity of
+the original Bugzilla commenter. This, however, may not always be
+possible. In ``example_config/user_mappings.yml``, users with the
+designation "bugzilla" may have left the organization and therefore not
+have current GitLab accounts, or might simply be machine users. Comments
+for such users will be left under a generic "bugzilla" account.
+bugzilla2gitlab doesn't create any new user accounts. All of the
+accounts specified in ``user_mappings.yml`` must already exist in your
+GitLab installation.
+
+How it works
+------------
+
+GitLab
+~~~~~~
+
+Gitlab has a comprehensive and extensively documented API. Here are the
+main endpoints that this library makes use of. - `Creating new
+issues <http://doc.gitlab.com/ce/api/issues.html#new-issue>`__ - `Adding
+comments to issues <http://doc.gitlab.com/ce/api/notes.html>`__ -
+`Uploading
+files <http://doc.gitlab.com/ce/api/projects.html#upload-a-file>`__ -
+`Changing an issue
+status <http://doc.gitlab.com/ce/api/issues.html#edit-issue>`__ -
+`Getting user
+ids <http://doc.gitlab.com/ce/api/users.html#for-admins>`__
+
+Calls to the Gitlab API must be made with an administrator private token
+in order to `impersonate other
+users <http://doc.gitlab.com/ce/api/#sudo>`__.\`
+
+Bugzilla
+~~~~~~~~
+
+This script relies on being able to fetch bug data by simply appending
+``&ctype=xml`` to the end of the bugzilla bug url, and then parsing the
+resultant xml. If this trick doesn't work on your bugzilla installation,
+then bugzilla2gitlab won't work for you.
+
+Caveats
+-------
+
+Every comment or mention in GitLab typically sends a notification. This
+is true even for comments/issues created programatically. To avoid users
+inboxes being flooded with meaningless email notifications and avoid
+overwhelming your SMTP servers, GitLab users should disable all email
+notifications (global and group-specific) just prior to the running of
+this script. This can be done through the `gitlab
+UI <https://git.zib.de/profile/notifications>`__.
+
+Tests
+-----
+
+::
+
+    ./runtests tests
