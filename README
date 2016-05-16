@@ -1,4 +1,4 @@
-//travis-ci.org/xmunoz/bugzilla2gitlab.svg?branch=master)](https://travis-ci.org/xmunoz/bugzilla2gitlab)
+|Build Status| 
 # bugzilla2gitlab
 
 Introduction
@@ -134,3 +134,6 @@ Tests
 ::
 
     ./runtests tests
+
+.. |Build Status| image:: https://travis-ci.org/xmunoz/bugzilla2gitlab.svg?branch=master
+   :target: https://travis-ci.org/xmunoz/bugzilla2gitlab
