@@ -8,7 +8,8 @@ def _perform_request(url, method, data={}, params={}, headers={}, files={}, json
     Utility method to perform an HTTP request.
     '''
     if dry_run:
-        print url, method, "dry_run"
+        msg = "{} {} dry_run".format(url, method)
+        print(msg)
         return 0
 
     func = getattr(requests, method)
