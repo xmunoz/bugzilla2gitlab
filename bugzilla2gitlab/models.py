@@ -1,6 +1,6 @@
 import re
 
-from utils import _perform_request, markdown_table_row, format_datetime
+from .utils import _perform_request, markdown_table_row, format_datetime
 
 conf = None
 

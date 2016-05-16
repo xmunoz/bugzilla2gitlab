@@ -1,9 +1,9 @@
 import yaml
 import os
-from utils import _perform_request
 from collections import namedtuple
 import random
 
+from .utils import _perform_request
 
 Config = namedtuple('Config', ["gitlab_base_url", "gitlab_project_id",
                                "bugzilla_base_url", "bugzilla_auto_reporter",
