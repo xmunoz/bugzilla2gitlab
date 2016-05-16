@@ -1,3 +1,4 @@
+//travis-ci.org/xmunoz/bugzilla2gitlab.svg?branch=master)](https://travis-ci.org/xmunoz/bugzilla2gitlab)
 # bugzilla2gitlab
 
 ## Introduction
