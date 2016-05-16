@@ -166,7 +166,7 @@ class Issue(object):
     def save(self):
         self.validate()
         url = "{}/projects/{}/issues".format(conf.gitlab_base_url, conf.gitlab_project_id)
-        data = {k:v for k,v in self.__dict__.iteritems() if k in self.data_fields}
+        data = {k:v for k,v in self.__dict__.items() if k in self.data_fields}
         self.headers["sudo"] = self.sudo
 
         response = _perform_request(url, "post", headers=self.headers, data=data, json=True,
@@ -232,7 +232,7 @@ class Comment(object):
         self.validate()
         self.headers["sudo"] = self.sudo
         url = "{}/projects/{}/issues/{}/notes".format(conf.gitlab_base_url, conf.gitlab_project_id, self.issue_id)
-        data = {k:v for k,v in self.__dict__.iteritems() if k in self.data_fields}
+        data = {k:v for k,v in self.__dict__.items() if k in self.data_fields}
 
         _perform_request(url, "post", headers=self.headers, data=data, json=True, dry_run=conf.dry_run)
 
