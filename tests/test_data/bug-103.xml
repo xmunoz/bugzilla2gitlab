@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<!DOCTYPE bugzilla SYSTEM "https://landfill.bugzilla.org/bugzilla-5.0-branch/page.cgi?id=bugzilla.dtd">
+
+<bugzilla version="5.0.3+"
+          urlbase="https://landfill.bugzilla.org/bugzilla-5.0-branch/"
+          
+          maintainer="webmaster@bugzilla.org"
+>
+
+    <bug>
+          <bug_id>103</bug_id>
+          
+          <creation_ts>2000-09-18 02:47:33 -0700</creation_ts>
+          <short_desc>What are the Spice Girls doing in my spice dispenser?</short_desc>
+          <delta_ts>2014-06-01 07:57:32 -0700</delta_ts>
+          <reporter_accessible>1</reporter_accessible>
+          <cclist_accessible>1</cclist_accessible>
+          <classification_id>1</classification_id>
+          <classification>Unclassified</classification>
+          <product>FoodReplicator</product>
+          <component>SaltSprinkler</component>
+          <version>1.0</version>
+          <rep_platform>Other</rep_platform>
+          <op_sys>Other</op_sys>
+          <bug_status>RESOLVED</bug_status>
+          <resolution>DUPLICATE</resolution>
+          <dup_id>20</dup_id>
+          
+          <bug_file_loc></bug_file_loc>
+          <status_whiteboard></status_whiteboard>
+          <keywords></keywords>
+          <priority>P2</priority>
+          <bug_severity>normal</bug_severity>
+          <target_milestone>---</target_milestone>
+          <dependson>22803</dependson>
+          <blocked>23</blocked>
+          <everconfirmed>1</everconfirmed>
+          <reporter name="Matthew Cline">matt</reporter>
+          <assigned_to name="Chris Yeh">cyeh</assigned_to>
+          <cc>christyloanle</cc>
+    
+    <cc>vinay.chalamcharla</cc>
+          
+          
+          <cf_large_text></cf_large_text>
+          <cf_free_text></cf_free_text>
+          
+          <cf_drop_down>---</cf_drop_down>
+          
+          
+
+      
+
+      
+
+      
+
+          <comment_sort_order>oldest_to_newest</comment_sort_order>  
+          <long_desc isprivate="0" >
+    <commentid>202</commentid>
+    <comment_count>0</comment_count>
+    <who name="Matthew Cline">matt</who>
+    <bug_when>2000-09-18 02:47:33 -0700</bug_when>
+    <thetext>Upon openning the spice dispenser in order to add the required raw materials,
+I found minature versions of the Spice Girls inside of it.  Having had no
+food or air for the months the product sat on the shelf, they were all
+dead an mumified, their sightless eyes staring at me from shriveled, leering
+faces.  But that&apos;s besides the point.  I don&apos;t want anything so artificial
+as the Spice Girls going into my food!</thetext>
+  </long_desc><long_desc isprivate="0" >
+    <commentid>12126</commentid>
+    <comment_count>1</comment_count>
+    <who name="Christy">christyloanle</who>
+    <bug_when>2008-05-21 16:21:59 -0700</bug_when>
+    <thetext>
+
+*** This bug has been marked as a duplicate of bug 20 ***</thetext>
+  </long_desc>
+      
+      
+
+    </bug>
+
+</bugzilla>

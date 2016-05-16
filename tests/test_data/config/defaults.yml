@@ -1,5 +1,7 @@
 ---
-# If true, don't execute any put or post requests. Still execute get requests though.
+# If true, don't execute any `put` or `post` requests.
+# dry_run=true still executes get requests though.
+# set to true for debugging or development.
 dry_run: true
 
 # gitlab api base url without trailing slash
@@ -22,7 +24,7 @@ datetime_format_string: "%b %d, %Y %H:%M"
 # Generic bugzilla user that bug reporting forms would create bugs as
 # Important to perform better formatting for the Issue description
 # Optional
-bugzilla_auto_reporter: "scipweb"
+bugzilla_auto_reporter: "webreporter"
 
 # GitLab user for misc or old bugzilla users that don't have GitLab accounts
 bugzilla_misc_user: "bugzilla"

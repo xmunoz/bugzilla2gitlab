@@ -210,7 +210,7 @@ class Comment(object):
                                                  format_datetime(fields["bug_when"],
                                                  conf.datetime_format_string))
         else:
-            self.body = format_datetime(fields["bug_when"], conf.datetime_formatting_string)
+            self.body = format_datetime(fields["bug_when"], conf.datetime_format_string)
             self.body += "\n\n"
     
         # if this comment is actually an attachment, upload the attachment and add the

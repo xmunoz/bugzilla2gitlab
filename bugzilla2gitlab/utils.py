@@ -42,13 +42,12 @@ def format_datetime(datestr, formatting):
     return parsed_dt.strftime(formatting)
 
 
-def get_bugzilla_bug(bugzilla_url, bid):
+def get_bugzilla_bug(bugzilla_url, bug_id):
     '''
     Read bug XML, return all fields and values in a dictionary.
     '''
-    url = "{}/show_bug.cgi?ctype=xml&id={}".format(bugzilla_url, bid)
-    response = _perform_request(url, "get", json=False)
-    tree = ElementTree.fromstring(response.content)
+    bug_xml = _fetch_bug_content(bugzilla_url, bug_id)
+    tree = ElementTree.fromstring(bug_xml)
 
     bug_fields = {
         "long_desc" : [],
@@ -69,6 +68,10 @@ def get_bugzilla_bug(bugzilla_url, bid):
 
     return bug_fields
 
+def _fetch_bug_content(url, bug_id):
+    url = "{}/show_bug.cgi?ctype=xml&id={}".format(url, bug_id)
+    response = _perform_request(url, "get", json=False)
+    return reponse.content
 
 def validate_list(integer_list):
     '''

@@ -7,19 +7,16 @@ import random
 
 Config = namedtuple('Config', ["gitlab_base_url", "gitlab_project_id",
                                "bugzilla_base_url", "bugzilla_auto_reporter",
-                               "default_headers", "closed_statuses",
-                               "component_mappings", "bugzilla_users",
-                               "gitlab_users", "default_gitlab_labels",
+                               "default_headers", "component_mappings",
+                               "bugzilla_users", "gitlab_users", "bugzilla_misc_user",
+                               "default_gitlab_labels", "datetime_format_string",
                                "dry_run"])
 
 def get_config(path):
     configuration = {}
     configuration.update(_load_defaults(path))
-    configuration.update(_load_closed_statuses(path))
-
     configuration.update(_load_user_id_cache(path, configuration["gitlab_base_url"],
                                              configuration["default_headers"]))
-
     configuration.update(_load_component_mappings(path))
     return Config(**configuration)
 
@@ -37,12 +34,6 @@ def _load_defaults(path):
             defaults[key] = config[key]
 
     return defaults
-
-
-def _load_closed_statuses(path):
-    with open(os.path.join(path, "closed_statuses.yml")) as f:
-        statuses = yaml.load(f)
-    return {"closed_statuses" : statuses}
 
 
 def _load_user_id_cache(path, gitlab_url, gitlab_headers):

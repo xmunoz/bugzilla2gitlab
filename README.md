@@ -45,7 +45,7 @@ This package can also be used as a python module.
 ```
 from bugzilla2gitlab import Migrator
 
-client = Migrator(config_path="/path/to/example_config")
+client = Migrator(config_path="/path/to/config")
 bugs_list = [1,2,3,4,5,6,7]
 client.migrate(bugs_list)
 ```
@@ -58,7 +58,7 @@ To begin using bugzilla2gitlab, the following list of configuration files is req
 - `user_mappings.yml`: key, value pairs of Bugzilla usernames to GitLab users
 - `component_mappings.yml`: key, value pairs of Bugzilla components to Gitlab labels
 
-Samples of all of these files can be found in `example_config`.
+Samples of all of these files can be found in `tests/test_data/config`.
 
 bugzilla2gitlab creates issues and comments in GitLab with the user accounts specified in `user_mappings.yml`, perserving the integrity of the original Bugzilla commenter. This, however, may not always be possible. In `example_config/user_mappings.yml`, users with the designation "bugzilla" may have left the organization and therefore not have current GitLab accounts, or might simply be machine users. Comments for such users will be left under a generic "bugzilla" account. bugzilla2gitlab doesn't create any new user accounts. All of the accounts specified in `user_mappings.yml` must already exist in your GitLab installation.
 
