@@ -96,12 +96,13 @@ class Issue(object):
         self.description = markdown_table_row("", "")
         self.description += markdown_table_row("---", "---")
 
-        bug_id = fields["bug_id"]
-        link = "{}/show_bug.cgi?id={}".format(conf.bugzilla_base_url, bug_id)
-        self.description += markdown_table_row("Bugzilla Link",
+        if conf.include_bugzilla_link:
+            bug_id = fields["bug_id"]
+            link = "{}/show_bug.cgi?id={}".format(conf.bugzilla_base_url, bug_id)
+            self.description += markdown_table_row("Bugzilla Link",
                                                "[{}]({})".format(bug_id, link))
 
-        formatted_dt = format_datetime(fields["creation_ts"], conf.datetime_format_string) 
+        formatted_dt = format_datetime(fields["creation_ts"], conf.datetime_format_string)
         self.description += markdown_table_row("Created on", formatted_dt)
 
         if fields.get("resolution"):
@@ -150,7 +151,7 @@ class Issue(object):
                     email = re.match(regex, user_data, flags=re.M).group(1)
                     self.description += markdown_table_row("Reporter", email)
             # Add original reporter to the markdown table
-            elif conf.bugzilla_users[fields["reporter"]] == conf.bugzilla_misc_user:
+            elif conf.bugzilla_users[fields["reporter"]] == conf.gitlab_misc_user:
                 self.description += markdown_table_row("Reporter", fields["reporter"])
 
             self.description += ext_description
@@ -174,7 +175,7 @@ class Issue(object):
 
         if conf.dry_run:
             # assign a random number so that program can continue
-            self.id = 5 
+            self.id = 5
             return
 
         self.id = response["id"]
@@ -205,14 +206,14 @@ class Comment(object):
     def load_fields(self, fields):
         self.sudo = conf.gitlab_users[conf.bugzilla_users[fields["who"]]]
         # if unable to comment as the original user, put username in comment body
-        if conf.bugzilla_users[fields["who"]] == conf.bugzilla_misc_user:
+        if conf.bugzilla_users[fields["who"]] == conf.gitlab_misc_user:
             self.body = "By {} on {}\n\n".format(fields["who"],
                                                  format_datetime(fields["bug_when"],
                                                  conf.datetime_format_string))
         else:
             self.body = format_datetime(fields["bug_when"], conf.datetime_format_string)
             self.body += "\n\n"
-    
+
         # if this comment is actually an attachment, upload the attachment and add the
         # markdown to the comment body
         if fields.get("attachid"):

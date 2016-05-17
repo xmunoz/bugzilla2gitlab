@@ -10,7 +10,7 @@ Config = namedtuple('Config', ["gitlab_base_url", "gitlab_project_id",
                                "default_headers", "component_mappings",
                                "bugzilla_users", "gitlab_users", "bugzilla_misc_user",
                                "default_gitlab_labels", "datetime_format_string",
-                               "dry_run"])
+                               "dry_run", "include_bugzilla_link"])
 
 def get_config(path):
     configuration = {}

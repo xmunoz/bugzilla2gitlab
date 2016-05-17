@@ -4,9 +4,8 @@
 
 ## Introduction
 
-Are you relying on a decades-old bugzilla installation for issue tracking? Do you want to move to a more modern issue tracker, but are afraid to lose the bug history? Do you have more important things to worry about than a Bugzilla to GitLab issue migration?
-
-If you answered yes to the above 3 questions, then bugzilla2gitlab might be for you.
+This is a tool for developers or admins who want to migrate the issue management for their software project from Bugzilla to Gitlab Issues. Here is a screenshoot of an issue created by bugzilla2gitlab:
+![bugzilla2gitlab created issue](https://raw.githubusercontent.com/xmunoz/bugzilla2gitlab/master/snapshot.png)
 
 ## Installation
 

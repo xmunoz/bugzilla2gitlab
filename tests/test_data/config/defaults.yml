@@ -18,19 +18,21 @@ gitlab_private_token: "SUPERSECRETTOKEN"
 # bugzilla base url without trailing slash
 bugzilla_base_url: "https://landfill.bugzilla.org/bugzilla-5.0-branch"
 
-# The way to format datetime strings in GitLab.
+# The way to format datetime strings in the gitlab issue description and comment body.
 datetime_format_string: "%b %d, %Y %H:%M"
 
-# Generic bugzilla user that bug reporting forms would create bugs as
-# Important to perform better formatting for the Issue description
+# Generic bugzilla user that bug reporting forms would create bugs as. Performs better formatting for the Issue description
 # Optional
 bugzilla_auto_reporter: "webreporter"
 
-# GitLab user for misc or old bugzilla users that don't have GitLab accounts
-bugzilla_misc_user: "bugzilla"
+# Generic gitLab user for misc or old bugzilla users that don't have GitLab accounts
+gitlab_misc_user: "bugzilla"
 
 # Default label(s) to add to all migrated bugs
 # Optional
 default_gitlab_labels:
     - "bugzilla"
     - "legacy"
+
+# Include a link to the original bugzilla bug in the GitLab issue description
+include_bugzilla_link: true
