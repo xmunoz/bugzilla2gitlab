@@ -1,16 +1,15 @@
-|Build Status| 
-# bugzilla2gitlab
+|Build Status|
+
+bugzilla2gitlab
+===============
 
 Introduction
 ------------
 
-Are you relying on a decades-old bugzilla installation for issue
-tracking? Do you want to move to a more modern issue tracker, but are
-afraid to lose the bug history? Do you have more important things to
-worry about than a Bugzilla to GitLab issue migration?
-
-If you answered yes to the above 3 questions, then bugzilla2gitlab might
-be for you.
+This is a tool for developers or admins who want to migrate the issue
+management for their software project from Bugzilla to Gitlab Issues.
+Here is a screenshoot of an issue created by bugzilla2gitlab:
+|bugzilla2gitlab created issue|
 
 Installation
 ------------
@@ -66,7 +65,7 @@ Configuration
 -------------
 
 To begin using bugzilla2gitlab, the following list of configuration
-files is required:
+files is required in the specified ``config`` directory:
 
 -  ``defaults.yml``: Core default values used throughout the modules.
 -  ``user_mappings.yml``: key, value pairs of Bugzilla usernames to
@@ -74,16 +73,16 @@ files is required:
 -  ``component_mappings.yml``: key, value pairs of Bugzilla components
    to Gitlab labels
 
-Samples of all of these files can be found in
-``tests/test_data/config``.
+Samples of all of these files with documentation for each configuration
+variable can be found in ``tests/test_data/config``.
 
 bugzilla2gitlab creates issues and comments in GitLab with the user
 accounts specified in ``user_mappings.yml``, perserving the integrity of
 the original Bugzilla commenter. This, however, may not always be
-possible. In ``example_config/user_mappings.yml``, users with the
-designation "bugzilla" may have left the organization and therefore not
-have current GitLab accounts, or might simply be machine users. Comments
-for such users will be left under a generic "bugzilla" account.
+possible. In ``tests/test_data/config/user_mappings.yml``, users with
+the designation "bugzilla" may have left the organization and therefore
+not have current GitLab accounts, or might simply be machine users.
+Comments for such users will be left under a generic "bugzilla" account.
 bugzilla2gitlab doesn't create any new user accounts. All of the
 accounts specified in ``user_mappings.yml`` must already exist in your
 GitLab installation.
@@ -95,15 +94,15 @@ GitLab
 ~~~~~~
 
 Gitlab has a comprehensive and extensively documented API. Here are the
-main endpoints that this library makes use of. - `Creating new
-issues <http://doc.gitlab.com/ce/api/issues.html#new-issue>`__ - `Adding
-comments to issues <http://doc.gitlab.com/ce/api/notes.html>`__ -
-`Uploading
-files <http://doc.gitlab.com/ce/api/projects.html#upload-a-file>`__ -
-`Changing an issue
-status <http://doc.gitlab.com/ce/api/issues.html#edit-issue>`__ -
-`Getting user
-ids <http://doc.gitlab.com/ce/api/users.html#for-admins>`__
+main endpoints that this library makes use of.
+
+::
+
+    - [Creating new issues](http://doc.gitlab.com/ce/api/issues.html#new-issue)
+    - [Adding comments to issues](http://doc.gitlab.com/ce/api/notes.html)
+    - [Uploading files](http://doc.gitlab.com/ce/api/projects.html#upload-a-file)
+    - [Changing an issue status](http://doc.gitlab.com/ce/api/issues.html#edit-issue)
+    - [Getting user ids](http://doc.gitlab.com/ce/api/users.html#for-admins)
 
 Calls to the Gitlab API must be made with an administrator private token
 in order to `impersonate other
@@ -131,9 +130,19 @@ UI <https://git.zib.de/profile/notifications>`__.
 Tests
 -----
 
+There is currently a need for more tests. The tests that are in place
+can be run by:
+
 ::
 
     ./runtests tests
 
+If you want to test this library on a non-production GitLab instance, I
+recommend spinning up a `one-click GitLab droplet from
+DigitalOcean <https://www.digitalocean.com/features/one-click-apps/gitlab/>`__.
+From there, create a code repository, add some user accounts, and take
+bugzilla2gitlab for a spin.
+
 .. |Build Status| image:: https://travis-ci.org/xmunoz/bugzilla2gitlab.svg?branch=master
    :target: https://travis-ci.org/xmunoz/bugzilla2gitlab
+.. |bugzilla2gitlab created issue| image:: https://raw.githubusercontent.com/xmunoz/bugzilla2gitlab/master/snapshot.png

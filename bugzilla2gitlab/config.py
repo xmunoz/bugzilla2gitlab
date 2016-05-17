@@ -8,7 +8,7 @@ from .utils import _perform_request
 Config = namedtuple('Config', ["gitlab_base_url", "gitlab_project_id",
                                "bugzilla_base_url", "bugzilla_auto_reporter",
                                "default_headers", "component_mappings",
-                               "bugzilla_users", "gitlab_users", "bugzilla_misc_user",
+                               "bugzilla_users", "gitlab_users", "gitlab_misc_user",
                                "default_gitlab_labels", "datetime_format_string",
                                "dry_run", "include_bugzilla_link"])
 
