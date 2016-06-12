@@ -71,11 +71,11 @@ bugzilla2gitlab creates issues and comments in GitLab with the user accounts spe
 
 Gitlab has a comprehensive and extensively documented API. Here are the main endpoints that this library makes use of.
 
-    - [Creating new issues](http://doc.gitlab.com/ce/api/issues.html#new-issue)
-    - [Adding comments to issues](http://doc.gitlab.com/ce/api/notes.html)
-    - [Uploading files](http://doc.gitlab.com/ce/api/projects.html#upload-a-file)
-    - [Changing an issue status](http://doc.gitlab.com/ce/api/issues.html#edit-issue)
-    - [Getting user ids](http://doc.gitlab.com/ce/api/users.html#for-admins)
+- [Creating new issues](http://doc.gitlab.com/ce/api/issues.html#new-issue)
+- [Adding comments to issues](http://doc.gitlab.com/ce/api/notes.html)
+- [Uploading files](http://doc.gitlab.com/ce/api/projects.html#upload-a-file)
+- [Changing an issue status](http://doc.gitlab.com/ce/api/issues.html#edit-issue)
+- [Getting user ids](http://doc.gitlab.com/ce/api/users.html#for-admins)
 
 Calls to the Gitlab API must be made with an administrator private token in order to [impersonate other users](http://doc.gitlab.com/ce/api/#sudo).`
 
