@@ -77,7 +77,7 @@ Gitlab has a comprehensive and extensively documented API. Here are the main end
 - [Changing an issue status](http://doc.gitlab.com/ce/api/issues.html#edit-issue)
 - [Getting user ids](http://doc.gitlab.com/ce/api/users.html#for-admins)
 
-Calls to the Gitlab API must be made with an administrator private token in order to [impersonate other users](http://doc.gitlab.com/ce/api/#sudo).`
+Calls to the Gitlab API must be made with an administrator private token in order to [impersonate other users](http://doc.gitlab.com/ce/api/#sudo).
 
 ### Bugzilla
 
@@ -85,7 +85,7 @@ This script relies on being able to fetch bug data by simply appending `&ctype=x
 
 ## Caveats
 
-Every comment or mention in GitLab typically sends a notification. This is true even for comments/issues created programatically. To avoid users inboxes being flooded with meaningless email notifications and avoid overwhelming your SMTP servers, GitLab users should disable all email notifications (global and group-specific) just prior to the running of this script. This can be done through the [gitlab UI](https://git.zib.de/profile/notifications).
+Every comment or mention in GitLab typically sends a notification. This is true even for comments/issues created programatically. To avoid users inboxes being flooded with meaningless email notifications and avoid overwhelming your SMTP servers, GitLab users should disable all email notifications (global and group-specific) just prior to the running of this script. This can be done through the [gitlab UI](https://gitlab.com/profile/notifications).
 
 ## Tests
 
