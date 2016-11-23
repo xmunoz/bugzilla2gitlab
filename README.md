@@ -65,7 +65,7 @@ Samples of all of these files with documentation for each configuration variable
 
 bugzilla2gitlab creates issues and comments in GitLab with the user accounts specified in `user_mappings.yml`, perserving the integrity of the original Bugzilla commenter. This, however, may not always be possible. In `tests/test_data/config/user_mappings.yml`, users with the designation "bugzilla" may have left the organization and therefore not have current GitLab accounts, or might simply be machine users. Comments for such users will be left under a generic "bugzilla" account. bugzilla2gitlab doesn't create any new user accounts. All of the accounts specified in `user_mappings.yml` must already exist in your GitLab installation.
 
-The default table created in the issue description by `bugzilla2gitlab` looks like this:
+The default table created in the issue description by bugzilla2gitlab looks like this:
 
 |  |  |
 | --- | --- |
