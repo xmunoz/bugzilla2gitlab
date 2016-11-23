@@ -77,7 +77,7 @@ The default table created in the issue description by `bugzilla2gitlab` looks li
 | Attachments | [a_PHP_play_script_to_demonstrate_how_the_browser_requests_videos](/uploads/e521dd042dc4cfd3d49151d87dee8058/a_PHP_play_script_to_demonstrate_how_the_browser_requests_videos) |
 | Reporter | mozilla |
 
-To modify this table, take a look at `create_description` in (models.py)[/bugzilla2gitlab/models.py].
+To modify this table, take a look at `create_description` in [models.py](/bugzilla2gitlab/models.py#L89).
 
 ## How it works
 
