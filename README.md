@@ -65,6 +65,20 @@ Samples of all of these files with documentation for each configuration variable
 
 bugzilla2gitlab creates issues and comments in GitLab with the user accounts specified in `user_mappings.yml`, perserving the integrity of the original Bugzilla commenter. This, however, may not always be possible. In `tests/test_data/config/user_mappings.yml`, users with the designation "bugzilla" may have left the organization and therefore not have current GitLab accounts, or might simply be machine users. Comments for such users will be left under a generic "bugzilla" account. bugzilla2gitlab doesn't create any new user accounts. All of the accounts specified in `user_mappings.yml` must already exist in your GitLab installation.
 
+The default table created in the issue description by `bugzilla2gitlab` looks like this:
+
+|  |  |
+| --- | --- |
+| Bugzilla Link | [570755](https://bugzilla.mozilla.org/show_bug.cgi?id=570755) |
+| Created on | Jun 08, 2010 10:25 |
+| Version | unspecified |
+| OS | All |
+| Architecture | All |
+| Attachments | [a_PHP_play_script_to_demonstrate_how_the_browser_requests_videos](/uploads/e521dd042dc4cfd3d49151d87dee8058/a_PHP_play_script_to_demonstrate_how_the_browser_requests_videos) |
+| Reporter | mozilla |
+
+To modify this table, take a look at `create_description` in (models.py)[/bugzilla2gitlab/models.py].
+
 ## How it works
 
 ### GitLab
