@@ -63,7 +63,7 @@ To begin using bugzilla2gitlab, the following list of configuration files is req
 
 Samples of all of these files with documentation for each configuration variable can be found in `tests/test_data/config`.
 
-bugzilla2gitlab creates issues and comments in GitLab with the user accounts specified in `user_mappings.yml`, perserving the integrity of the original Bugzilla commenter. This, however, may not always be possible. In `tests/test_data/config/user_mappings.yml`, users with the designation "bugzilla" may have left the organization and therefore not have current GitLab accounts, or might simply be machine users. Comments for such users will be left under a generic "bugzilla" account. bugzilla2gitlab doesn't create any new user accounts. All of the accounts specified in `user_mappings.yml` must already exist in your GitLab installation.
+bugzilla2gitlab creates issues and comments in GitLab with the user accounts specified in `user_mappings.yml`, perserving the integrity of the original Bugzilla commenter. This, however, may not always be possible. In [tests/test_data/config/user_mappings.yml](tests/test_data/config/user_mappings.yml), users with the designation "bugzilla" may have left the organization and therefore not have current GitLab accounts, or might simply be machine users. Comments for such users will be left under a generic "bugzilla" account. bugzilla2gitlab doesn't create any new user accounts. All of the accounts specified in `user_mappings.yml` must already exist in your GitLab installation.
 
 The default table created in the issue description by bugzilla2gitlab looks like this:
 
@@ -77,7 +77,7 @@ The default table created in the issue description by bugzilla2gitlab looks like
 | Attachments | [a_PHP_play_script_to_demonstrate_how_the_browser_requests_videos](/uploads/e521dd042dc4cfd3d49151d87dee8058/a_PHP_play_script_to_demonstrate_how_the_browser_requests_videos) |
 | Reporter | mozilla |
 
-To modify this table, take a look at `create_description` in [models.py](/bugzilla2gitlab/models.py#L89).
+To modify this table, take a look at `create_description` in [models.py](/bugzilla2gitlab/models.py#L92).
 
 ## How it works
 
@@ -95,7 +95,7 @@ Calls to the Gitlab API must be made with an administrator private token in orde
 
 ### Bugzilla
 
-This script relies on being able to fetch bug data by simply appending `&ctype=xml` to the end of the bugzilla bug url, and then parsing the resultant xml. If this trick doesn't work on your bugzilla installation, then bugzilla2gitlab won't work for you.
+This program relies on being able to fetch bug data by simply appending `&ctype=xml` to the end of the bugzilla bug url, and then parsing the resultant xml. If this trick doesn't work on your bugzilla installation, then bugzilla2gitlab probably won't work for you.
 
 ## Caveats
 
@@ -109,3 +109,6 @@ There is currently a need for more tests. The tests that are in place can be run
 ```
 
 If you want to test this library on a non-production GitLab instance, I recommend spinning up a [one-click GitLab droplet from DigitalOcean](https://www.digitalocean.com/features/one-click-apps/gitlab/). From there, create a code repository, add some user accounts, and take bugzilla2gitlab for a spin.
+
+## Contributing
+Check out [CONTRIBUTING.md].
