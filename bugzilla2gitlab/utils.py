@@ -7,7 +7,7 @@ def _perform_request(url, method, data={}, params={}, headers={}, files={}, json
     '''
     Utility method to perform an HTTP request.
     '''
-    if dry_run:
+    if dry_run and method != "get":
         msg = "{} {} dry_run".format(url, method)
         print(msg)
         return 0
@@ -72,7 +72,7 @@ def get_bugzilla_bug(bugzilla_url, bug_id):
 def _fetch_bug_content(url, bug_id):
     url = "{}/show_bug.cgi?ctype=xml&id={}".format(url, bug_id)
     response = _perform_request(url, "get", json=False)
-    return reponse.content
+    return response.content
 
 def validate_list(integer_list):
     '''

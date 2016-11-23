@@ -62,7 +62,7 @@ def _load_user_id_cache(path, gitlab_url, gitlab_headers):
 
 def _get_user_id(username, gitlab_url, headers):
     url = "{}/users?username={}".format(gitlab_url, username)
-    result = _perform_request(url, "get", headers=headers, dry_run=True)
+    result = _perform_request(url, "get", headers=headers)
     if result and isinstance(result, list):
         return result[0]["id"]
     else:
