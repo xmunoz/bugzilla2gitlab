@@ -2,6 +2,14 @@
 
 # bugzilla2gitlab
 
+- [Introduction](#introduction)
+- [Installation](#installation)
+- [Usage](#usage)
+- [How it works](#how-it-works)
+- [Caveats](#caveats)
+- [Tests](#tests)
+- [Contributing](#contributing)
+
 ## Introduction
 
 This is a tool for developers or admins who want to migrate the issue management for their software project from Bugzilla to Gitlab Issues. Here is a screenshoot of an issue created by bugzilla2gitlab:
@@ -22,6 +30,8 @@ virtualenv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
+
+bugzilla2gitlab is compatible with python2.7, 3.3, 3.4 and 3.5.
 
 ## Usage
 
@@ -108,7 +118,8 @@ There is currently a need for more tests. The tests that are in place can be run
 ./runtests tests
 ```
 
-If you want to test this library on a non-production GitLab instance, I recommend spinning up a [one-click GitLab droplet from DigitalOcean](https://www.digitalocean.com/features/one-click-apps/gitlab/). From there, create a code repository, add some user accounts, and take bugzilla2gitlab for a spin.
+If you want to test this library on a non-production GitLab instance, I recommend starting up a [one-click GitLab droplet from DigitalOcean](https://www.digitalocean.com/features/one-click-apps/gitlab/). From there, you can create a code repository, add some user accounts, and take bugzilla2gitlab for a spin.
 
 ## Contributing
+
 Check out [CONTRIBUTING.md](CONTRIBUTING.md).
