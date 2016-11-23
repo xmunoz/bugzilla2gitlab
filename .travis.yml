@@ -5,6 +5,10 @@ python:
   - "3.4"
   - "3.5"
 install:
+  - "pip install flake8"
   - "pip install -r requirements.txt"
   - "python setup.py install"
+before_script:
+  - "flake8 bugzilla2gitlab/*.py"
+  - "flake8 tests/*.py"
 script: ./runtests tests/

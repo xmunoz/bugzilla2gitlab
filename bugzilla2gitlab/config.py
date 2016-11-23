@@ -1,7 +1,6 @@
 import yaml
 import os
 from collections import namedtuple
-import random
 
 from .utils import _perform_request
 
@@ -11,6 +10,7 @@ Config = namedtuple('Config', ["gitlab_base_url", "gitlab_project_id",
                                "bugzilla_users", "gitlab_users", "gitlab_misc_user",
                                "default_gitlab_labels", "datetime_format_string",
                                "dry_run", "include_bugzilla_link"])
+
 
 def get_config(path):
     configuration = {}
@@ -29,7 +29,7 @@ def _load_defaults(path):
 
     for key in config:
         if key == "gitlab_private_token":
-            defaults["default_headers"] =  {"private-token": config[key]}
+            defaults["default_headers"] = {"private-token": config[key]}
         else:
             defaults[key] = config[key]
 
@@ -74,4 +74,3 @@ def _load_component_mappings(path):
         component_mappings = yaml.load(f)
 
     return {"component_mappings": component_mappings}
-

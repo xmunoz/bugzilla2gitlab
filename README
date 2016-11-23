@@ -89,6 +89,98 @@ bugzilla2gitlab doesn't create any new user accounts. All of the
 accounts specified in ``user_mappings.yml`` must already exist in your
 GitLab installation.
 
+The default table created in the issue description by
+``bugzilla2gitlab`` looks like this:
+
++------+------+
+| Bugz | `570 |
+| illa | 755  |
+| Link | <htt |
+|      | ps:/ |
+|      | /bug |
+|      | zill |
+|      | a.mo |
+|      | zill |
+|      | a.or |
+|      | g/sh |
+|      | ow_b |
+|      | ug.c |
+|      | gi?i |
+|      | d=57 |
+|      | 0755 |
+|      | >`__ |
++------+------+
+| Crea | Jun  |
+| ted  | 08,  |
+| on   | 2010 |
+|      | 10:2 |
+|      | 5    |
++------+------+
+| Vers | unsp |
+| ion  | ecif |
+|      | ied  |
++------+------+
+| OS   | All  |
++------+------+
+| Arch | All  |
+| itec |      |
+| ture |      |
++------+------+
+| Atta | `a\_ |
+| chme | PHP\ |
+| nts  | _pla |
+|      | y\_s |
+|      | crip |
+|      | t\_t |
+|      | o\_d |
+|      | emon |
+|      | stra |
+|      | te\_ |
+|      | how\ |
+|      | _the |
+|      | \_br |
+|      | owse |
+|      | r\_r |
+|      | eque |
+|      | sts\ |
+|      | _vid |
+|      | eos  |
+|      | </up |
+|      | load |
+|      | s/e5 |
+|      | 21dd |
+|      | 042d |
+|      | c4cf |
+|      | d3d4 |
+|      | 9151 |
+|      | d87d |
+|      | ee80 |
+|      | 58/a |
+|      | _PHP |
+|      | _pla |
+|      | y_sc |
+|      | ript |
+|      | _to_ |
+|      | demo |
+|      | nstr |
+|      | ate_ |
+|      | how_ |
+|      | the_ |
+|      | brow |
+|      | ser_ |
+|      | requ |
+|      | ests |
+|      | _vid |
+|      | eos> |
+|      | `__  |
++------+------+
+| Repo | mozi |
+| rter | lla  |
++------+------+
+
+To modify this table, take a look at ``create_description`` in
+`models.py </bugzilla2gitlab/models.py#L89>`__.
+
 How it works
 ------------
 
@@ -98,17 +190,20 @@ GitLab
 Gitlab has a comprehensive and extensively documented API. Here are the
 main endpoints that this library makes use of.
 
-::
-
-    - [Creating new issues](http://doc.gitlab.com/ce/api/issues.html#new-issue)
-    - [Adding comments to issues](http://doc.gitlab.com/ce/api/notes.html)
-    - [Uploading files](http://doc.gitlab.com/ce/api/projects.html#upload-a-file)
-    - [Changing an issue status](http://doc.gitlab.com/ce/api/issues.html#edit-issue)
-    - [Getting user ids](http://doc.gitlab.com/ce/api/users.html#for-admins)
+-  `Creating new
+   issues <http://doc.gitlab.com/ce/api/issues.html#new-issue>`__
+-  `Adding comments to
+   issues <http://doc.gitlab.com/ce/api/notes.html>`__
+-  `Uploading
+   files <http://doc.gitlab.com/ce/api/projects.html#upload-a-file>`__
+-  `Changing an issue
+   status <http://doc.gitlab.com/ce/api/issues.html#edit-issue>`__
+-  `Getting user
+   ids <http://doc.gitlab.com/ce/api/users.html#for-admins>`__
 
 Calls to the Gitlab API must be made with an administrator private token
 in order to `impersonate other
-users <http://doc.gitlab.com/ce/api/#sudo>`__.\`
+users <http://doc.gitlab.com/ce/api/#sudo>`__.
 
 Bugzilla
 ~~~~~~~~
@@ -127,7 +222,7 @@ inboxes being flooded with meaningless email notifications and avoid
 overwhelming your SMTP servers, GitLab users should disable all email
 notifications (global and group-specific) just prior to the running of
 this script. This can be done through the `gitlab
-UI <https://git.zib.de/profile/notifications>`__.
+UI <https://gitlab.com/profile/notifications>`__.
 
 Tests
 -----
@@ -148,3 +243,4 @@ bugzilla2gitlab for a spin.
 .. |Build Status| image:: https://travis-ci.org/xmunoz/bugzilla2gitlab.svg?branch=master
    :target: https://travis-ci.org/xmunoz/bugzilla2gitlab
 .. |bugzilla2gitlab created issue| image:: https://raw.githubusercontent.com/xmunoz/bugzilla2gitlab/master/snapshot.png
+

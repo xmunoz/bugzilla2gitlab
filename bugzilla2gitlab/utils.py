@@ -2,6 +2,7 @@ import requests
 import dateutil.parser
 from xml.etree import ElementTree
 
+
 def _perform_request(url, method, data={}, params={}, headers={}, files={}, json=True,
                      dry_run=False):
     '''
@@ -51,7 +52,7 @@ def get_bugzilla_bug(bugzilla_url, bug_id):
     tree = ElementTree.fromstring(bug_xml)
 
     bug_fields = {
-        "long_desc" : [],
+        "long_desc": [],
         "attachment": [],
         "cc": [],
     }
@@ -69,14 +70,16 @@ def get_bugzilla_bug(bugzilla_url, bug_id):
 
     return bug_fields
 
+
 def _fetch_bug_content(url, bug_id):
     url = "{}/show_bug.cgi?ctype=xml&id={}".format(url, bug_id)
     response = _perform_request(url, "get", json=False)
     return response.content
 
+
 def validate_list(integer_list):
     '''
-    Ensure that the user-supplied input is a list of integers, or a list of strings 
+    Ensure that the user-supplied input is a list of integers, or a list of strings
     that can be parsed as integers.
     '''
     if not integer_list:
@@ -84,7 +87,7 @@ def validate_list(integer_list):
 
     if not isinstance(integer_list, list):
         raise Exception("Expected a list of integers. Instead recieved "
-                            "a(n) {}".format(type(integer_list)))
+                        "a(n) {}".format(type(integer_list)))
 
         for i in integer_list:
             try:

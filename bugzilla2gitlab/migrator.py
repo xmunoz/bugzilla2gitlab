@@ -23,4 +23,3 @@ class Migrator(object):
         fields = get_bugzilla_bug(self.conf.bugzilla_base_url, bugzilla_bug_id)
         issue_thread = IssueThread(self.conf, fields)
         issue_thread.save()
-

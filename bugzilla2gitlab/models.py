@@ -4,6 +4,7 @@ from .utils import _perform_request, markdown_table_row, format_datetime
 
 conf = None
 
+
 class IssueThread(object):
     '''
     Everything related to an issue in GitLab, e.g. the issue itself and subsequent comments.
@@ -26,6 +27,7 @@ class IssueThread(object):
         the issue description, as well as any subsequent comments that are simply attachments
         from the original reporter. What remains below should be a list of genuine comments.
         '''
+
         for comment_fields in fields["long_desc"]:
             if comment_fields.get("thetext"):
                 self.comments.append(Comment(comment_fields))
@@ -70,7 +72,8 @@ class Issue(object):
 
     def create_labels(self, component, operating_system):
         '''
-        Creates 3 types of labels: default labels listed in the configuration, component labels, and operating system labels.
+        Creates 3 types of labels: default labels listed in the configuration, component labels,
+        and operating system labels.
         '''
         labels = []
         if conf.default_gitlab_labels:
@@ -100,7 +103,7 @@ class Issue(object):
             bug_id = fields["bug_id"]
             link = "{}/show_bug.cgi?id={}".format(conf.bugzilla_base_url, bug_id)
             self.description += markdown_table_row("Bugzilla Link",
-                                               "[{}]({})".format(bug_id, link))
+                                                   "[{}]({})".format(bug_id, link))
 
         formatted_dt = format_datetime(fields["creation_ts"], conf.datetime_format_string)
         self.description += markdown_table_row("Created on", formatted_dt)
@@ -109,14 +112,15 @@ class Issue(object):
             self.description += markdown_table_row("Resolution", fields["resolution"])
             self.description += markdown_table_row("Resolved on",
                                                    format_datetime(fields["delta_ts"],
-                                                   conf.datetime_format_string))
+                                                                   conf.datetime_format_string))
 
         self.description += markdown_table_row("Version", fields.get("version"))
         self.description += markdown_table_row("OS", fields.get("op_sys"))
         self.description += markdown_table_row("Architecture", fields.get("rep_platform"))
 
         # add first comment to the issue description
-        if fields["reporter"] == fields["long_desc"][0]["who"] and fields["long_desc"][0]["thetext"]:
+        if (fields["reporter"] == fields["long_desc"][0]["who"] and
+                fields["long_desc"][0]["thetext"]):
             ext_description += "\n## Extended Description \n"
             ext_description += "\n\n".join(re.split("\n*", fields["long_desc"][0]["thetext"]))
             del fields["long_desc"][0]
@@ -156,7 +160,6 @@ class Issue(object):
 
             self.description += ext_description
 
-
     def validate(self):
         for field in self.required_fields:
             value = getattr(self, field)
@@ -167,7 +170,7 @@ class Issue(object):
     def save(self):
         self.validate()
         url = "{}/projects/{}/issues".format(conf.gitlab_base_url, conf.gitlab_project_id)
-        data = {k:v for k,v in self.__dict__.items() if k in self.data_fields}
+        data = {k: v for k, v in self.__dict__.items() if k in self.data_fields}
         self.headers["sudo"] = self.sudo
 
         response = _perform_request(url, "post", headers=self.headers, data=data, json=True,
@@ -181,9 +184,10 @@ class Issue(object):
         self.id = response["id"]
 
     def close(self):
-        url = "{}/projects/{}/issues/{}".format(conf.gitlab_base_url, conf.gitlab_project_id, self.id)
+        url = "{}/projects/{}/issues/{}".format(conf.gitlab_base_url, conf.gitlab_project_id,
+                                                self.id)
         data = {
-            "state_event" : "close",
+            "state_event": "close",
         }
         self.headers["sudo"] = self.sudo
 
@@ -232,10 +236,12 @@ class Comment(object):
     def save(self):
         self.validate()
         self.headers["sudo"] = self.sudo
-        url = "{}/projects/{}/issues/{}/notes".format(conf.gitlab_base_url, conf.gitlab_project_id, self.issue_id)
-        data = {k:v for k,v in self.__dict__.items() if k in self.data_fields}
+        url = "{}/projects/{}/issues/{}/notes".format(conf.gitlab_base_url, conf.gitlab_project_id,
+                                                      self.issue_id)
+        data = {k: v for k, v in self.__dict__.items() if k in self.data_fields}
 
-        _perform_request(url, "post", headers=self.headers, data=data, json=True, dry_run=conf.dry_run)
+        _perform_request(url, "post", headers=self.headers, data=data, json=True,
+                         dry_run=conf.dry_run)
 
 
 class Attachment(object):
@@ -269,6 +275,7 @@ class Attachment(object):
             return "[attachment]({})".format(self.filename)
 
         return attachment["markdown"]
+
 
 def validate_user(bugzilla_user):
     if bugzilla_user not in conf.bugzilla_users:
