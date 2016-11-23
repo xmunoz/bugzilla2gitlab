@@ -256,7 +256,7 @@ class Attachment(object):
         return matches.group(2)
 
     def save(self):
-        url = "{}attachment.cgi?id={}".format(conf.bugzilla_base_url, self.id)
+        url = "{}/attachment.cgi?id={}".format(conf.bugzilla_base_url, self.id)
         result = _perform_request(url, "get", json=False)
 
         url = "{}/projects/{}/uploads".format(conf.gitlab_base_url, conf.gitlab_project_id)
