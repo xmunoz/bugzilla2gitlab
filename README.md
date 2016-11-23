@@ -111,4 +111,4 @@ There is currently a need for more tests. The tests that are in place can be run
 If you want to test this library on a non-production GitLab instance, I recommend spinning up a [one-click GitLab droplet from DigitalOcean](https://www.digitalocean.com/features/one-click-apps/gitlab/). From there, create a code repository, add some user accounts, and take bugzilla2gitlab for a spin.
 
 ## Contributing
-Check out [CONTRIBUTING.md].
+Check out [CONTRIBUTING.md](CONTRIBUTING.md).
