@@ -1,7 +1,6 @@
 # Contributing
 
-This project adheres to the [Contributor Covenant Code of Conduct][code-of-conduct]. By participating, you are expected to honor this code.
-[code-of-conduct]: http://contributor-covenant.org/version/1/4/
+This project adheres to the [Contributor Covenant Code of Conduct](http://contributor-covenant.org/version/1/4/). By participating, you are expected to honor this code.
 
 ## Getting started
 
