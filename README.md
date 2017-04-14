@@ -29,6 +29,8 @@ cd bugzilla2gitlab
 virtualenv venv
 source venv/bin/activate
 pip install -r requirements.txt
+# installs this package locally
+pip install .
 ```
 
 bugzilla2gitlab is compatible with python2.7, 3.3, 3.4 and 3.5.
@@ -38,13 +40,13 @@ bugzilla2gitlab is compatible with python2.7, 3.3, 3.4 and 3.5.
 bugzilla2gitlab synchronously migrates a user-defined list of bugzilla bugs to a single GitLab project. There are two interfaces for this library. The command line usage:
 
 ```
-$  bin/run_migrator.py -h
-usage: run_migrator.py [-h] [FILE] [CONFIG_DIRECTORY]
+$  bin/bugzilla2gitlab -h
+usage: bugzilla2gitlab [-h] [FILE] [CONFIG_DIRECTORY]
 
-Migrate bugs from bugzilla to gitlab.
+Migrate bugs from Bugzilla to GitLab Issues.
 
 positional arguments:
-  [FILE]              A file containing a list of bugzilla bug numbers to
+  [FILE]              A file containing a list of Bugzilla bug numbers to
                       migrate, one per line.
   [CONFIG_DIRECTORY]  The directory containing the required configuration
                       files.
