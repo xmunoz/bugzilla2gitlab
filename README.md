@@ -13,7 +13,7 @@
 ## Introduction
 
 This is a tool for developers or admins who want to migrate the issue management for their software project from Bugzilla to Gitlab Issues. Here is a screenshoot of an issue created by bugzilla2gitlab:
-![bugzilla2gitlab created issue](https://raw.githubusercontent.com/xmunoz/bugzilla2gitlab/master/snapshot.png)
+![bugzilla2gitlab created issue](snapshot.png)
 
 bugzilla2gitlab copies over bugs, bug comments and attachments.
 
