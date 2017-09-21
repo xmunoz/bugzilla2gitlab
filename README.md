@@ -1,4 +1,4 @@
-[![PyPI version](https://badge.fury.io/py/bugzilla2gitlab.svg)](http://badge.fury.io/py/bugzilla2gitlab) [![Build Status](https://travis-ci.org/xmun0x/bugzilla2gitlab.svg?branch=master)](https://travis-ci.org/xmun0x/bugzilla2gitlab)
+[![PyPI version](https://badge.fury.io/py/bugzilla2gitlab.svg)](http://badge.fury.io/py/bugzilla2gitlab) [![Build Status](https://travis-ci.org/xmunoz/bugzilla2gitlab.svg?branch=master)](https://travis-ci.org/xmunoz/bugzilla2gitlab)
 
 # bugzilla2gitlab
 

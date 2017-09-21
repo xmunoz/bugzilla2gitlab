@@ -1,7 +1,15 @@
-|Build Status|
+|PyPI version| |Build Status|
 
 bugzilla2gitlab
 ===============
+
+-  `Introduction <#introduction>`__
+-  `Installation <#installation>`__
+-  `Usage <#usage>`__
+-  `How it works <#how-it-works>`__
+-  `Caveats <#caveats>`__
+-  `Tests <#tests>`__
+-  `Contributing <#contributing>`__
 
 Introduction
 ------------
@@ -29,6 +37,10 @@ package to achieve a migration that you are happy with. In this case:
     virtualenv venv
     source venv/bin/activate
     pip install -r requirements.txt
+    # installs this package locally
+    pip install .
+
+bugzilla2gitlab is compatible with python2.7, 3.3, 3.4 and 3.5.
 
 Usage
 -----
@@ -39,13 +51,13 @@ library. The command line usage:
 
 ::
 
-    $  bin/run_migrator.py -h
-    usage: run_migrator.py [-h] [FILE] [CONFIG_DIRECTORY]
+    $  bin/bugzilla2gitlab -h
+    usage: bugzilla2gitlab [-h] [FILE] [CONFIG_DIRECTORY]
 
-    Migrate bugs from bugzilla to gitlab.
+    Migrate bugs from Bugzilla to GitLab Issues.
 
     positional arguments:
-      [FILE]              A file containing a list of bugzilla bug numbers to
+      [FILE]              A file containing a list of Bugzilla bug numbers to
                           migrate, one per line.
       [CONFIG_DIRECTORY]  The directory containing the required configuration
                           files.
@@ -81,16 +93,17 @@ variable can be found in ``tests/test_data/config``.
 bugzilla2gitlab creates issues and comments in GitLab with the user
 accounts specified in ``user_mappings.yml``, perserving the integrity of
 the original Bugzilla commenter. This, however, may not always be
-possible. In ``tests/test_data/config/user_mappings.yml``, users with
-the designation "bugzilla" may have left the organization and therefore
-not have current GitLab accounts, or might simply be machine users.
-Comments for such users will be left under a generic "bugzilla" account.
-bugzilla2gitlab doesn't create any new user accounts. All of the
-accounts specified in ``user_mappings.yml`` must already exist in your
-GitLab installation.
+possible. In
+`tests/test\_data/config/user\_mappings.yml <tests/test_data/config/user_mappings.yml>`__,
+users with the designation "bugzilla" may have left the organization and
+therefore not have current GitLab accounts, or might simply be machine
+users. Comments for such users will be left under a generic "bugzilla"
+account. bugzilla2gitlab doesn't create any new user accounts. All of
+the accounts specified in ``user_mappings.yml`` must already exist in
+your GitLab installation.
 
-The default table created in the issue description by
-``bugzilla2gitlab`` looks like this:
+The default table created in the issue description by bugzilla2gitlab
+looks like this:
 
 +------+------+
 | Bugz | `570 |
@@ -179,7 +192,7 @@ The default table created in the issue description by
 +------+------+
 
 To modify this table, take a look at ``create_description`` in
-`models.py </bugzilla2gitlab/models.py#L89>`__.
+`models.py </bugzilla2gitlab/models.py#L92>`__.
 
 How it works
 ------------
@@ -208,10 +221,10 @@ users <http://doc.gitlab.com/ce/api/#sudo>`__.
 Bugzilla
 ~~~~~~~~
 
-This script relies on being able to fetch bug data by simply appending
+This program relies on being able to fetch bug data by simply appending
 ``&ctype=xml`` to the end of the bugzilla bug url, and then parsing the
 resultant xml. If this trick doesn't work on your bugzilla installation,
-then bugzilla2gitlab won't work for you.
+then bugzilla2gitlab probably won't work for you.
 
 Caveats
 -------
@@ -235,12 +248,19 @@ can be run by:
     ./runtests tests
 
 If you want to test this library on a non-production GitLab instance, I
-recommend spinning up a `one-click GitLab droplet from
+recommend starting up a `one-click GitLab droplet from
 DigitalOcean <https://www.digitalocean.com/features/one-click-apps/gitlab/>`__.
-From there, create a code repository, add some user accounts, and take
-bugzilla2gitlab for a spin.
+From there, you can create a code repository, add some user accounts,
+and take bugzilla2gitlab for a spin.
 
+Contributing
+------------
+
+Check out `CONTRIBUTING.md <CONTRIBUTING.md>`__.
+
+.. |PyPI version| image:: https://badge.fury.io/py/bugzilla2gitlab.svg
+   :target: http://badge.fury.io/py/bugzilla2gitlab
 .. |Build Status| image:: https://travis-ci.org/xmunoz/bugzilla2gitlab.svg?branch=master
    :target: https://travis-ci.org/xmunoz/bugzilla2gitlab
-.. |bugzilla2gitlab created issue| image:: https://raw.githubusercontent.com/xmunoz/bugzilla2gitlab/master/snapshot.png
+.. |bugzilla2gitlab created issue| image:: snapshot.png
 
