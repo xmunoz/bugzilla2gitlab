@@ -118,21 +118,18 @@ class Issue(object):
         self.description += markdown_table_row("Architecture", fields.get("rep_platform"))
 
         # add first comment to the issue description
-        if (fields["reporter"] == fields["long_desc"][0]["who"] and
-                fields["long_desc"][0]["thetext"]):
-            ext_description += "\n## Extended Description \n"
-            ext_description += "\n\n".join(re.split("\n*", fields["long_desc"][0]["thetext"]))
-            del fields["long_desc"][0]
-
         attachments = []
         to_delete = []
-        for i in range(0, len(fields["long_desc"])):
+        comment0 = fields["long_desc"][0]
+        if (fields["reporter"] == comment0["who"] and comment0["thetext"]):
+            ext_description += "\n## Extended Description \n"
+            ext_description += "\n\n".join(re.split("\n*", comment0["thetext"]))
+            self.update_attachments(fields["reporter"], comment0, attachments)
+            to_delete.append(0)
+
+        for i in range(1, len(fields["long_desc"])):
             comment = fields["long_desc"][i]
-            # any attachments from the reporter in comments should also go in the issue description
-            if comment.get("attachid") and comment.get("who") == fields["reporter"]:
-                filename = Attachment.parse_filename(comment.get("thetext"))
-                attachment_markdown = Attachment(comment.get("attachid"), filename).save()
-                attachments.append(attachment_markdown)
+            if self.update_attachments(fields["reporter"], comment, attachments):
                 to_delete.append(i)
 
         # delete comments that have already added to the issue description
@@ -158,6 +155,17 @@ class Issue(object):
                 self.description += markdown_table_row("Reporter", fields["reporter"])
 
             self.description += ext_description
+
+    def update_attachments(self, reporter, comment, attachments):
+        '''
+        Fetches attachments from comment if authored by reporter.
+        '''
+        if comment.get("attachid") and comment.get("who") == reporter:
+            filename = Attachment.parse_file_description(comment.get("thetext"))
+            attachment_markdown = Attachment(comment.get("attachid"), filename).save()
+            attachments.append(attachment_markdown)
+            return True
+        return False
 
     def validate(self):
         for field in self.required_fields:
@@ -220,7 +228,7 @@ class Comment(object):
         # if this comment is actually an attachment, upload the attachment and add the
         # markdown to the comment body
         if fields.get("attachid"):
-            filename = Attachment.parse_filename(fields["thetext"])
+            filename = Attachment.parse_file_description(fields["thetext"])
             attachment_markdown = Attachment(fields["attachid"], filename).save()
             self.body += attachment_markdown
         else:
@@ -246,13 +254,13 @@ class Attachment(object):
     '''
     The attachment model
     '''
-    def __init__(self, bugzilla_attachment_id, filename):
+    def __init__(self, bugzilla_attachment_id, file_description):
         self.id = bugzilla_attachment_id
-        self.filename = filename
+        self.file_description = file_description
         self.headers = conf.default_headers
 
     @classmethod
-    def parse_filename(cls, comment):
+    def parse_file_description(cls, comment):
         regex = "^Created attachment (\d*)\s?(.*)$"
         matches = re.match(regex, comment, flags=re.M)
         if not matches:
@@ -262,17 +270,29 @@ class Attachment(object):
     def save(self):
         url = "{}/attachment.cgi?id={}".format(conf.bugzilla_base_url, self.id)
         result = _perform_request(url, "get", json=False)
+        filename = self.file_description
+        # Use real filename to store attachment but descriptive name for issue text
+        if 'Content-disposition' in result.headers:
+            regex = "^.*; filename=\"(.*)\"$"
+            matches = re.match(regex, result.headers['Content-disposition'], flags=re.M)
+            if matches:
+                filename = matches.group(1)
 
         url = "{}/projects/{}/uploads".format(conf.gitlab_base_url, conf.gitlab_project_id)
-        f = {"file": (self.filename, result.content)}
+        f = {"file": (filename, result.content)}
 
         attachment = _perform_request(url, "post", headers=self.headers, files=f, json=True,
                                       dry_run=conf.dry_run)
 
-        if conf.dry_run:
-            return "[attachment]({})".format(self.filename)
+        link = filename
+        if attachment and attachment["markdown"]:
+           # [mail_route.zip](/uploads/e943e69eb2478529f2f1c7c7ea00fb46/mail_route.zip)
+            regex = "^\[.*\]\((.*)\)$"
+            matches = re.match(regex, attachment["markdown"], flags=re.M)
+            if matches:
+                link = matches.group(1)
 
-        return attachment["markdown"]
+        return "[" + self.file_description + "](" + link + ")"
 
 
 def validate_user(bugzilla_user):
