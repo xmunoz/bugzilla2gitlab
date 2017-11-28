@@ -5,7 +5,7 @@
 dry_run: true
 
 # gitlab api base url without trailing slash
-gitlab_base_url: "https://git.example.com/api/v3"
+gitlab_base_url: "https://git.example.com/api/v4"
 
 # The gitlab project id
 gitlab_project_id: 5
