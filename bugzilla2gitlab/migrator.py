@@ -1,6 +1,6 @@
-from .utils import get_bugzilla_bug, validate_list
-from .models import IssueThread
 from .config import get_config
+from .models import IssueThread
+from .utils import bugzilla_login, get_bugzilla_bug, validate_list
 
 
 class Migrator(object):
@@ -12,6 +12,8 @@ class Migrator(object):
         Migrate a list of bug ids from Bugzilla to GitLab.
         '''
         validate_list(bug_list)
+        if self.conf.bugzilla_user:
+            bugzilla_login(self.conf.bugzilla_base_url, self.conf.bugzilla_user)
         for bug in bug_list:
             self.migrate_one(bug)
 
