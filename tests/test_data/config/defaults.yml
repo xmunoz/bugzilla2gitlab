@@ -18,6 +18,10 @@ gitlab_private_token: "SUPERSECRETTOKEN"
 # bugzilla base url without trailing slash
 bugzilla_base_url: "https://landfill.bugzilla.org/bugzilla-5.0-branch"
 
+# bugzilla user, set to an empty string when anonymous access is allowed
+# when not empty, you are prompted for password once upon script startup
+bugzilla_user:
+
 # The way to format datetime strings in the gitlab issue description and comment body.
 datetime_format_string: "%b %d, %Y %H:%M"
 
