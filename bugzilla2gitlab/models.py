@@ -1,6 +1,6 @@
 import re
 
-from .utils import _perform_request, format_datetime, markdown_table_row
+from .utils import _perform_request, format_datetime, format_utc, markdown_table_row
 
 conf = None
 
@@ -44,7 +44,7 @@ class IssueThread(object):
             comment.save()
 
         # close the issue in GitLab, if it is resolved in Bugzilla
-        if self.issue.status == "RESOLVED":
+        if self.issue.status in ["RESOLVED", "VERIFIED", "CLOSED"]:
             self.issue.close()
 
 
@@ -52,9 +52,8 @@ class Issue(object):
     '''
     The issue model
     '''
-    required_fields = ["sudo", "title", "description", "status"]
-    data_fields = ["sudo", "title", "description", "status", "assignee_id", "milestone",
-                   "labels"]
+    required_fields = ["title", "description"]
+    data_fields = ["created_at", "title", "description", "assignee_ids", "milestone", "labels"]
 
     def __init__(self, bugzilla_fields):
         self.headers = conf.default_headers
@@ -64,8 +63,8 @@ class Issue(object):
 
     def load_fields(self, fields):
         self.title = fields["short_desc"]
-        self.sudo = conf.gitlab_users[conf.bugzilla_users[fields["reporter"]]]
-        self.assignee_id = conf.gitlab_users[conf.bugzilla_users[fields["assigned_to"]]]
+        self.assignee_ids = [conf.gitlab_users[conf.bugzilla_users[fields["assigned_to"]]]]
+        self.created_at = format_utc(fields["creation_ts"])
         self.status = fields["bug_status"]
         self.create_labels(fields["component"], fields.get("op_sys"))
         self.create_description(fields)
@@ -171,7 +170,6 @@ class Issue(object):
         self.validate()
         url = "{}/projects/{}/issues".format(conf.gitlab_base_url, conf.gitlab_project_id)
         data = {k: v for k, v in self.__dict__.items() if k in self.data_fields}
-        self.headers["sudo"] = self.sudo
 
         response = _perform_request(url, "post", headers=self.headers, data=data, json=True,
                                     dry_run=conf.dry_run)
@@ -181,7 +179,7 @@ class Issue(object):
             self.id = 5
             return
 
-        self.id = response["id"]
+        self.id = response["iid"]
 
     def close(self):
         url = "{}/projects/{}/issues/{}".format(conf.gitlab_base_url, conf.gitlab_project_id,
@@ -189,7 +187,6 @@ class Issue(object):
         data = {
             "state_event": "close",
         }
-        self.headers["sudo"] = self.sudo
 
         _perform_request(url, "put", headers=self.headers, data=data, dry_run=conf.dry_run)
 
@@ -199,8 +196,8 @@ class Comment(object):
     The comment model
     '''
 
-    required_fields = ["sudo", "body", "issue_id"]
-    data_fields = ["body"]
+    required_fields = ["body", "issue_id"]
+    data_fields = ["created_at", "body"]
 
     def __init__(self, bugzilla_fields):
         self.headers = conf.default_headers
@@ -208,8 +205,8 @@ class Comment(object):
         self.load_fields(bugzilla_fields)
 
     def load_fields(self, fields):
-        self.sudo = conf.gitlab_users[conf.bugzilla_users[fields["who"]]]
         # if unable to comment as the original user, put username in comment body
+        self.created_at = format_utc(fields["bug_when"])
         if conf.bugzilla_users[fields["who"]] == conf.gitlab_misc_user:
             self.body = "By {} on {}\n\n".format(
                 fields["who"],
@@ -237,7 +234,6 @@ class Comment(object):
 
     def save(self):
         self.validate()
-        self.headers["sudo"] = self.sudo
         url = "{}/projects/{}/issues/{}/notes".format(conf.gitlab_base_url, conf.gitlab_project_id,
                                                       self.issue_id)
         data = {k: v for k, v in self.__dict__.items() if k in self.data_fields}

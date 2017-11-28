@@ -2,6 +2,7 @@ from getpass import getpass
 from xml.etree import ElementTree
 
 import dateutil.parser
+import pytz
 import requests
 
 session = None
@@ -41,7 +42,7 @@ def markdown_table_row(key, value):
     '''
     Create a row in a markdown table.
     '''
-    return "| {} | {} |\n".format(key, value)
+    return "| " + key + " | " + value + " |\n"
 
 
 def format_datetime(datestr, formatting):
@@ -50,6 +51,15 @@ def format_datetime(datestr, formatting):
     '''
     parsed_dt = dateutil.parser.parse(datestr)
     return parsed_dt.strftime(formatting)
+
+
+def format_utc(datestr):
+    '''
+    Convert dateime string to UTC format recognized by gitlab.
+    '''
+    parsed_dt = dateutil.parser.parse(datestr)
+    utc_dt = parsed_dt.astimezone(pytz.utc)
+    return utc_dt.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def get_bugzilla_bug(bugzilla_url, bug_id):
