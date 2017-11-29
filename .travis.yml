@@ -12,4 +12,4 @@ install:
 before_script:
   - "flake8 bugzilla2gitlab/*.py"
   - "flake8 tests/*.py"
-script: ./runtests tests/
+script: pytest
