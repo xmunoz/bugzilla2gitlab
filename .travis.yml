@@ -6,10 +6,9 @@ python:
   - "3.5"
   - "3.6"
 install:
-  - "pip install flake8"
-  - "pip install -r requirements.txt"
+  - "pip install -r requirements-dev.txt"
   - "python setup.py install"
 before_script:
-  - "flake8 bugzilla2gitlab/*.py"
-  - "flake8 tests/*.py"
+  - "flake8 bugzilla2gitlab"
+  - "flake8 tests"
 script: pytest
