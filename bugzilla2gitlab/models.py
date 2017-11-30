@@ -1,6 +1,6 @@
 import re
 
-from .utils import _perform_request, format_datetime, format_utc, markdown_table_row
+from .utils import _perform_request, markdown_table_row, format_datetime, format_utc
 
 conf = None
 
@@ -216,11 +216,9 @@ class Comment(object):
         # if unable to comment as the original user, put username in comment body
         self.created_at = format_utc(fields["bug_when"])
         if conf.bugzilla_users[fields["who"]] == conf.gitlab_misc_user:
-            self.body = "By {} on {}\n\n".format(
-                fields["who"],
-                format_datetime(
-                    fields["bug_when"],
-                    conf.datetime_format_string))
+            self.body = "By {} on {}\n\n".format(fields["who"],
+                                                 format_datetime(fields["bug_when"],
+                                                 conf.datetime_format_string))
         else:
             self.body = format_datetime(fields["bug_when"], conf.datetime_format_string)
             self.body += "\n\n"

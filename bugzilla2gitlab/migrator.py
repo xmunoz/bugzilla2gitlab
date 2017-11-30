@@ -1,6 +1,6 @@
-from .config import get_config
-from .models import IssueThread
 from .utils import bugzilla_login, get_bugzilla_bug, validate_list
+from .models import IssueThread
+from .config import get_config
 
 
 class Migrator(object):
