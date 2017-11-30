@@ -10,18 +10,18 @@ The best way to start developing this project is to set up a virtualenv and inst
     cd bugzilla2gitlab 
     virtualenv venv
     source venv/bin/activate
-    pip install -r requirements.txt
+    pip install -r requirements-dev.txt
 
 Run tests to confirm that everything is set up properly.
 
-    ./runtests tests/
+    pytest
 
 ## Submitting a pull request
 
 1. Fork this repository
 2. Create a branch: `git checkout -b my_feature`
 3. Make changes
-4. Install and run `flake8 bugzilla2gitlab/*.py`to ensure that your changes conform to the coding style of this project
+4. Install and run `flake8 bugzilla2gitlab` to ensure that your changes conform to the coding style of this project
 5. Commit: `git commit -am "Great new feature that closes #3"`. Reference any related issues in the first line of the commit message.
 6. Push: `git push origin my_feature`
 7. Open a pull request in Github
