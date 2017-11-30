@@ -1,7 +1,8 @@
-import requests
 from getpass import getpass
-import dateutil.parser
 from xml.etree import ElementTree
+
+import dateutil.parser
+import requests
 
 session = None
 

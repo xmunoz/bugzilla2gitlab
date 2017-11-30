@@ -1,6 +1,7 @@
-import yaml
-import os
 from collections import namedtuple
+import os
+
+import yaml
 
 from .utils import _perform_request
 
