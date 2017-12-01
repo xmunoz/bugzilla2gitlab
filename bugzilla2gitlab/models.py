@@ -44,7 +44,7 @@ class IssueThread(object):
             comment.save()
 
         # close the issue in GitLab, if it is resolved in Bugzilla
-        if self.issue.status in ["RESOLVED", "VERIFIED", "CLOSED"]:
+        if self.issue.status in conf.bugzilla_closed_states:
             self.issue.close()
 
 
