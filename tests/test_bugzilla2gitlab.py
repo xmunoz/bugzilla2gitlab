@@ -1,9 +1,9 @@
-import random
 import os.path
+import random
 
 from bugzilla2gitlab import Migrator
-import bugzilla2gitlab.utils
 import bugzilla2gitlab.config
+import bugzilla2gitlab.utils
 
 TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), "test_data")
 
