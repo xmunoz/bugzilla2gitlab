@@ -1,8 +1,9 @@
+from getpass import getpass
+from xml.etree import ElementTree
+
+import dateutil.parser
 import pytz
 import requests
-from getpass import getpass
-import dateutil.parser
-from xml.etree import ElementTree
 
 session = None
 
