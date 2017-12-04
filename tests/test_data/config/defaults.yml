@@ -29,6 +29,12 @@ datetime_format_string: "%b %d, %Y %H:%M"
 # Optional
 bugzilla_auto_reporter: "webreporter"
 
+# Bugzilla states that close the issue in gitlab
+bugzilla_closed_states:
+    - "RESOLVED"
+    - "VERIFIED"
+    - "CLOSED"
+
 # Generic gitLab user for misc or old bugzilla users that don't have GitLab accounts
 gitlab_misc_user: "bugzilla"
 
