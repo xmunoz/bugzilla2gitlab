@@ -290,7 +290,7 @@ class Attachment(object):
             if matches:
                 link = matches.group(1)
 
-        return "[" + self.file_description + "](" + link + ")"
+        return u"[{}]({})".format(self.file_description, link)
 
 
 def validate_user(bugzilla_user):
