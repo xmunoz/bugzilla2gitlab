@@ -41,7 +41,7 @@ def markdown_table_row(key, value):
     '''
     Create a row in a markdown table.
     '''
-    return "| " + key + " | " + value + " |\n"
+    return u"| {} | {} |\n".format(key, value)
 
 
 def format_datetime(datestr, formatting):
