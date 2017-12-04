@@ -291,7 +291,7 @@ class Attachment(object):
         link = filename
         if attachment and attachment["markdown"]:
            # [mail_route.zip](/uploads/e943e69eb2478529f2f1c7c7ea00fb46/mail_route.zip)
-            regex = "^\[.*\]\((.*)\)$"
+            regex = "^!?\[.*\]\((.*)\)$"
             matches = re.match(regex, attachment["markdown"], flags=re.M)
             if matches:
                 link = matches.group(1)
