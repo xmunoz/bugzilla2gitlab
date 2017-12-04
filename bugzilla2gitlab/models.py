@@ -127,9 +127,9 @@ class Issue(object):
             ext_description += "\n## Extended Description \n"
             ext_description += "\n\n".join(re.split("\n*", comment0["thetext"]))
             self.update_attachments(fields["reporter"], comment0, attachments)
-            to_delete.append(0)
+            del fields["long_desc"][0]
 
-        for i in range(1, len(fields["long_desc"])):
+        for i in range(0, len(fields["long_desc"])):
             comment = fields["long_desc"][i]
             if self.update_attachments(fields["reporter"], comment, attachments):
                 to_delete.append(i)
