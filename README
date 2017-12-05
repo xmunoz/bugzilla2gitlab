@@ -40,7 +40,7 @@ package to achieve a migration that you are happy with. In this case:
     # installs this package locally
     pip install .
 
-bugzilla2gitlab is compatible with python2.7, 3.3, 3.4 and 3.5.
+bugzilla2gitlab is compatible with python2.7, 3.3, 3.4, 3.5 and 3.6.
 
 Usage
 -----
