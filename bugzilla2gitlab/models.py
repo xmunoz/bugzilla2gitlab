@@ -274,22 +274,26 @@ class Attachment(object):
     def parse_file_name(self, headers):
         # Use real filename to store attachment but descriptive name for issue text
         if 'Content-disposition' not in headers:
-            raise Exception(u"No file name returned for attachment {}".format(self.file_description))
+            raise Exception(u"No file name returned for attachment {}"
+                            .format(self.file_description))
         # Content-disposition: application/zip; filename="mail_route.zip"
         regex = "^.*; filename=\"(.*)\"$"
         matches = re.match(regex, headers['Content-disposition'], flags=re.M)
         if not matches:
-            raise Exception("Failed to match file name for string: {}".format(headers['Content-disposition']))
+            raise Exception("Failed to match file name for string: {}"
+                            .format(headers['Content-disposition']))
         return matches.group(1)
 
     def parse_upload_link(self, attachment):
         if not (attachment and attachment["markdown"]):
-            raise Exception(u"No markdown returned for upload of attachment {}".format(self.file_description))
+            raise Exception(u"No markdown returned for upload of attachment {}"
+                            .format(self.file_description))
         # ![mail_route.zip](/uploads/e943e69eb2478529f2f1c7c7ea00fb46/mail_route.zip)
         regex = "^!?\[.*\]\((.*)\)$"
         matches = re.match(regex, attachment["markdown"], flags=re.M)
         if not matches:
-            raise Exception("Failed to match upload link for string: {}".format(attachment["markdown"]))
+            raise Exception("Failed to match upload link for string: {}"
+                            .format(attachment["markdown"]))
         return matches.group(1)
 
     def save(self):
