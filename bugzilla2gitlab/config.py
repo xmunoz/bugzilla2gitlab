@@ -49,7 +49,7 @@ def _load_user_id_cache(path, gitlab_url, gitlab_headers):
     for user in bugzilla_mapping:
         gitlab_username = bugzilla_mapping[user]
         uid = _get_user_id(gitlab_username, gitlab_url, gitlab_headers)
-        gitlab_users[gitlab_username] = uid
+        gitlab_users[gitlab_username] = str(uid)
 
     mappings = {}
     # bugzilla_username: gitlab_username
