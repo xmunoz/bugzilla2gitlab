@@ -93,7 +93,8 @@ class Issue(object):
 
     def create_milestone(self, title):
         '''
-        Looks up milestone id given its title or creates a new one. Does nothing if milestones are not mapped.
+        Looks up milestone id given its title or creates a new one. Does nothing if milestones
+        are not mapped.
         '''
         if not conf.map_milestones or title in conf.milestones_to_skip:
             return
