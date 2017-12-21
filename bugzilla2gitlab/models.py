@@ -100,7 +100,7 @@ class Issue(object):
 
         if title not in conf.gitlab_milestones:
             url = "{}/projects/{}/milestones".format(conf.gitlab_base_url, conf.gitlab_project_id)
-            response = _perform_request(url, "post", headers=conf.gitlab_headers, data={"title": title})
+            response = _perform_request(url, "post", headers=self.headers, data={"title": title})
             conf.gitlab_milestones[title] = response["id"]
 
         self.milestone_id = conf.gitlab_milestones[title]
