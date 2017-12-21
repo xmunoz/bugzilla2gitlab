@@ -46,3 +46,11 @@ default_gitlab_labels:
 
 # Include a link to the original bugzilla bug in the GitLab issue description
 include_bugzilla_link: true
+
+# Set to true to map bugzilla milestones to GitLab
+map_milestones: true
+
+# Do not map these bugzilla milestones to GitLab
+milestones_to_skip:
+    - "---"
+    - "UNKNOWN"
