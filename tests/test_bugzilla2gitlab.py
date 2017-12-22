@@ -49,7 +49,7 @@ def test_config(monkeypatch):
     assert isinstance(conf.map_keywords, bool)
 
     # conf.keywords_to_skip is a dictionary
-    assert isinstance(conf.keywords_to_skip, dict)
+    assert isinstance(conf.keywords_to_skip, list)
 
 
 def test_Migrator(monkeypatch):
