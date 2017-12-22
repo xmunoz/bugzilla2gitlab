@@ -42,6 +42,15 @@ def test_config(monkeypatch):
     # conf.compnent mappings is a dictionary
     assert isinstance(conf.component_mappings, dict)
 
+    # conf.map_operating_system is a boolean value
+    assert isinstance(conf.map_operating_system, bool)
+
+    # conf.map_keywords is a boolean value
+    assert isinstance(conf.map_keywords, bool)
+
+    # conf.keywords_to_skip is a dictionary
+    assert isinstance(conf.keywords_to_skip, dict)
+
 
 def test_Migrator(monkeypatch):
     bug_id = 103

@@ -10,6 +10,8 @@ Config = namedtuple('Config', ["gitlab_base_url", "gitlab_project_id",
                                "bugzilla_closed_states", "default_headers", "component_mappings",
                                "bugzilla_users", "gitlab_users", "gitlab_misc_user",
                                "default_gitlab_labels", "datetime_format_string",
+                               "map_operating_system",
+                               "map_keywords", "keywords_to_skip",
                                "dry_run", "include_bugzilla_link"])
 
 

@@ -46,3 +46,14 @@ default_gitlab_labels:
 
 # Include a link to the original bugzilla bug in the GitLab issue description
 include_bugzilla_link: true
+
+# Set to true to map bugzilla operating system to GitLab
+map_operating_system: false
+
+# Set to true to map bugzilla keywords to GitLab
+map_keywords: true
+
+# Do not map these bugzilla keywords to GitLab
+keywords_to_skip:
+    - "SKIPME"
+    - "NOTHING"

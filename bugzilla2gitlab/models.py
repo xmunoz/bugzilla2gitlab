@@ -68,13 +68,13 @@ class Issue(object):
         self.assignee_ids = [conf.gitlab_users[conf.bugzilla_users[fields["assigned_to"]]]]
         self.created_at = format_utc(fields["creation_ts"])
         self.status = fields["bug_status"]
-        self.create_labels(fields["component"], fields.get("op_sys"))
+        self.create_labels(fields["component"], fields.get("op_sys"), fields.get("keywords"))
         self.create_description(fields)
 
-    def create_labels(self, component, operating_system):
+    def create_labels(self, component, operating_system, keywords):
         '''
-        Creates 3 types of labels: default labels listed in the configuration, component labels,
-        and operating system labels.
+        Creates 4 types of labels: default labels listed in the configuration, component labels,
+        operating system labels, keyword labels.
         '''
         labels = []
         if conf.default_gitlab_labels:
@@ -85,8 +85,13 @@ class Issue(object):
             labels.append(component_label)
 
         # Do not create a label if the OS is other. That is a meaningless label.
-        if operating_system and operating_system != "Other":
+        if conf.map_operating_system and operating_system and operating_system != "Other":
             labels.append(operating_system)
+
+        if conf.map_keywords and keywords:
+            labels += [k.title()
+                       for k in keywords.replace(" ", "").split(",")
+                       if not (conf.keywords_to_skip and k in conf.keywords_to_skip)]
 
         self.labels = ",".join(labels)
 
