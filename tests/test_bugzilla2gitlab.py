@@ -13,8 +13,12 @@ def test_config(monkeypatch):
     def mockreturn(username, gitlab_url, headers):
         return random.randint(0, 100)
 
+    def mockmilestones(project_id, gitlab_url, headers):
+        return {"gitlab_milestones": {"Foo": 1}}
+
     # monkeypatch config method that performs API calls to return a random int instead
     monkeypatch.setattr(bugzilla2gitlab.config, '_get_user_id', mockreturn)
+    monkeypatch.setattr(bugzilla2gitlab.config, '_load_milestone_id_cache', mockmilestones)
     conf = bugzilla2gitlab.config.get_config(os.path.join(TEST_DATA_PATH, "config"))
     assert isinstance(conf, bugzilla2gitlab.config.Config)
     '''
@@ -42,12 +46,24 @@ def test_config(monkeypatch):
     # conf.compnent mappings is a dictionary
     assert isinstance(conf.component_mappings, dict)
 
+    # conf.map_milestones is a boolean value
+    assert isinstance(conf.map_milestones, bool)
+
+    # conf.milestones_to_skip is a list
+    assert isinstance(conf.milestones_to_skip, list)
+
+    # conf.gitlab_milestones is a dictionary
+    assert isinstance(conf.gitlab_milestones, dict)
+
 
 def test_Migrator(monkeypatch):
     bug_id = 103
 
     def mock_getuserid(username, gitlab_url, headers):
         return random.randint(0, 100)
+
+    def mock_loadmilestoneidcache(project_id, gitlab_url, headers):
+        return {"gitlab_milestones": {"Foo": 1}}
 
     def mock_fetchbugcontent(url, bug_id):
         bug_file = "bug-{}.xml".format(bug_id)
@@ -57,6 +73,8 @@ def test_Migrator(monkeypatch):
 
     # monkeypatch config method that performs API calls to return a random int instead
     monkeypatch.setattr(bugzilla2gitlab.config, '_get_user_id', mock_getuserid)
+    monkeypatch.setattr(bugzilla2gitlab.config, '_load_milestone_id_cache',
+                        mock_loadmilestoneidcache)
     monkeypatch.setattr(bugzilla2gitlab.utils, '_fetch_bug_content', mock_fetchbugcontent)
 
     # just test that it works without throwing any exceptions
