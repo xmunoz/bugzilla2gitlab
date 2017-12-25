@@ -68,7 +68,9 @@ class Issue(object):
         self.assignee_ids = [conf.gitlab_users[conf.bugzilla_users[fields["assigned_to"]]]]
         self.created_at = format_utc(fields["creation_ts"])
         self.status = fields["bug_status"]
-        self.create_milestone(fields["target_milestone"])
+        milestone = fields["target_milestone"]
+        if conf.map_milestones and milestone not in conf.milestones_to_skip:
+            self.create_milestone(milestone)
         self.create_labels(fields["component"], fields.get("op_sys"))
         self.create_description(fields)
 
@@ -91,20 +93,17 @@ class Issue(object):
 
         self.labels = ",".join(labels)
 
-    def create_milestone(self, title):
+    def create_milestone(self, milestone):
         '''
-        Looks up milestone id given its title or creates a new one. Does nothing if milestones
-        are not mapped.
+        Looks up milestone id given its title or creates a new one.
         '''
-        if not conf.map_milestones or title in conf.milestones_to_skip:
-            return
-
-        if title not in conf.gitlab_milestones:
+        if milestone not in conf.gitlab_milestones:
             url = "{}/projects/{}/milestones".format(conf.gitlab_base_url, conf.gitlab_project_id)
-            response = _perform_request(url, "post", headers=self.headers, data={"title": title})
-            conf.gitlab_milestones[title] = response["id"]
+            response = _perform_request(
+                url, "post", headers=self.headers, data={"title": milestone})
+            conf.gitlab_milestones[milestone] = response["id"]
 
-        self.milestone_id = conf.gitlab_milestones[title]
+        self.milestone_id = conf.gitlab_milestones[milestone]
 
     def create_description(self, fields):
         '''
