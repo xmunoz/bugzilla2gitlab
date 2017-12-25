@@ -74,7 +74,7 @@ class Issue(object):
     def create_labels(self, component, operating_system, keywords):
         '''
         Creates 4 types of labels: default labels listed in the configuration, component labels,
-        operating system labels, keyword labels.
+        operating system labels, and keyword labels.
         '''
         labels = []
         if conf.default_gitlab_labels:
@@ -89,9 +89,11 @@ class Issue(object):
             labels.append(operating_system)
 
         if conf.map_keywords and keywords:
-            labels += [k.title()
-                       for k in keywords.replace(" ", "").split(",")
-                       if not (conf.keywords_to_skip and k in conf.keywords_to_skip)]
+            # Input: payload of XML element like this: <keywords>SECURITY, SUPPORT</keywords>
+            # Bugzilla restriction: You may not use commas or whitespace in a keyword name.
+            for k in keywords.replace(" ", "").split(","):
+                if not (conf.keywords_to_skip and k in conf.keywords_to_skip):
+                    labels.append(k)
 
         self.labels = ",".join(labels)
 
