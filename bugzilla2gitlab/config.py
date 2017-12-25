@@ -10,8 +10,8 @@ Config = namedtuple('Config', ["gitlab_base_url", "gitlab_project_id",
                                "bugzilla_closed_states", "default_headers", "component_mappings",
                                "bugzilla_users", "gitlab_users", "gitlab_misc_user",
                                "default_gitlab_labels", "datetime_format_string",
-                               "map_operating_system",
-                               "map_keywords", "keywords_to_skip",
+                               "map_operating_system", "map_keywords", "keywords_to_skip",
+                               "map_milestones", "milestones_to_skip", "gitlab_milestones",
                                "dry_run", "include_bugzilla_link"])
 
 
@@ -20,6 +20,11 @@ def get_config(path):
     configuration.update(_load_defaults(path))
     configuration.update(_load_user_id_cache(path, configuration["gitlab_base_url"],
                                              configuration["default_headers"]))
+    if configuration["map_milestones"]:
+        configuration.update(
+            _load_milestone_id_cache(configuration["gitlab_project_id"],
+                                     configuration["gitlab_base_url"],
+                                     configuration["default_headers"]))
     configuration.update(_load_component_mappings(path))
     return Config(**configuration)
 
@@ -61,6 +66,22 @@ def _load_user_id_cache(path, gitlab_url, gitlab_headers):
     mappings["gitlab_users"] = gitlab_users
 
     return mappings
+
+
+def _load_milestone_id_cache(project_id, gitlab_url, gitlab_headers):
+    '''
+    Load cache of GitLab milestones and ids
+    '''
+    print("Loading milestone cache...")
+
+    gitlab_milestones = {}
+    url = "{}/projects/{}/milestones".format(gitlab_url, project_id)
+    result = _perform_request(url, "get", headers=gitlab_headers)
+    if result and isinstance(result, list):
+        for milestone in result:
+            gitlab_milestones[milestone["title"]] = milestone["id"]
+
+    return {"gitlab_milestones": gitlab_milestones}
 
 
 def _get_user_id(username, gitlab_url, headers):

@@ -57,3 +57,10 @@ map_keywords: true
 keywords_to_skip:
     - "SKIPME"
     - "NOTHING"
+# Set to true to map bugzilla milestones to GitLab
+map_milestones: true
+
+# Do not map these bugzilla milestones to GitLab
+milestones_to_skip:
+    - "---"
+    - "UNKNOWN"

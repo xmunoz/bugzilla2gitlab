@@ -53,7 +53,7 @@ class Issue(object):
     The issue model
     '''
     required_fields = ["sudo", "title", "description"]
-    data_fields = ["sudo", "created_at", "title", "description", "assignee_ids", "milestone",
+    data_fields = ["sudo", "created_at", "title", "description", "assignee_ids", "milestone_id",
                    "labels"]
 
     def __init__(self, bugzilla_fields):
@@ -69,6 +69,9 @@ class Issue(object):
         self.created_at = format_utc(fields["creation_ts"])
         self.status = fields["bug_status"]
         self.create_labels(fields["component"], fields.get("op_sys"), fields.get("keywords"))
+        milestone = fields["target_milestone"]
+        if conf.map_milestones and milestone not in conf.milestones_to_skip:
+            self.create_milestone(milestone)
         self.create_description(fields)
 
     def create_labels(self, component, operating_system, keywords):
@@ -96,6 +99,18 @@ class Issue(object):
                     labels.append(k)
 
         self.labels = ",".join(labels)
+
+    def create_milestone(self, milestone):
+        '''
+        Looks up milestone id given its title or creates a new one.
+        '''
+        if milestone not in conf.gitlab_milestones:
+            url = "{}/projects/{}/milestones".format(conf.gitlab_base_url, conf.gitlab_project_id)
+            response = _perform_request(
+                url, "post", headers=self.headers, data={"title": milestone})
+            conf.gitlab_milestones[milestone] = response["id"]
+
+        self.milestone_id = conf.gitlab_milestones[milestone]
 
     def create_description(self, fields):
         '''
