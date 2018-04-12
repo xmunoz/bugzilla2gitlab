@@ -9,10 +9,10 @@ from bugzilla2gitlab import Migrator
 
 def main():
     parser = argparse.ArgumentParser(description='Migrate bugs from Bugzilla to GitLab Issues.')
-    parser.add_argument('bug_list', metavar="[FILE]",
+    parser.add_argument('bug_list', metavar="BUGLIST",
                         help="A file containing a list of Bugzilla bug numbers to migrate,"
                         " one per line.")
-    parser.add_argument("conf_dir", metavar='[CONFIG_DIRECTORY]',
+    parser.add_argument("conf_dir", metavar='CONFIG_DIRECTORY',
                         help="The directory containing the required configuration files.")
     args = parser.parse_args()
 
