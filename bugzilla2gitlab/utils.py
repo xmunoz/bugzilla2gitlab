@@ -1,7 +1,7 @@
 from getpass import getpass
-from defusedxml import ElementTree
 
 import dateutil.parser
+from defusedxml import ElementTree
 import pytz
 import requests
 
