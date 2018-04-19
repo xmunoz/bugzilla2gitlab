@@ -1,5 +1,5 @@
 from getpass import getpass
-from xml.etree import ElementTree
+from defusedxml import ElementTree
 
 import dateutil.parser
 import pytz

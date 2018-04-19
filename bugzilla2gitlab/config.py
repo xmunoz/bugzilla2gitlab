@@ -31,7 +31,7 @@ def get_config(path):
 
 def _load_defaults(path):
     with open(os.path.join(path, "defaults.yml")) as f:
-        config = yaml.load(f)
+        config = yaml.safe_load(f)
 
     defaults = {}
 
@@ -50,7 +50,7 @@ def _load_user_id_cache(path, gitlab_url, gitlab_headers):
     '''
     print("Loading user cache...")
     with open(os.path.join(path, "user_mappings.yml")) as f:
-        bugzilla_mapping = yaml.load(f)
+        bugzilla_mapping = yaml.safe_load(f)
 
     gitlab_users = {}
     for user in bugzilla_mapping:
@@ -95,6 +95,6 @@ def _get_user_id(username, gitlab_url, headers):
 
 def _load_component_mappings(path):
     with open(os.path.join(path, "component_mappings.yml")) as f:
-        component_mappings = yaml.load(f)
+        component_mappings = yaml.safe_load(f)
 
     return {"component_mappings": component_mappings}

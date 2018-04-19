@@ -11,4 +11,5 @@ install:
 before_script:
   - "flake8 bugzilla2gitlab"
   - "flake8 tests"
+  - "bandit -r bugzilla2gitlab"
 script: pytest

@@ -1,4 +1,4 @@
-pyaml==17.10.0
-python-dateutil==2.6.1
-pytz==2017.3
+pyaml==17.12.1
+python-dateutil==2.7.2
+pytz==2018.4
 requests==2.18.4
