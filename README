@@ -8,7 +8,7 @@ bugzilla2gitlab
 -  `Usage <#usage>`__
 -  `How it works <#how-it-works>`__
 -  `Caveats <#caveats>`__
--  `Tests <#tests>`__
+-  `Demo <#demo>`__
 -  `Contributing <#contributing>`__
 
 Introduction
@@ -94,102 +94,38 @@ bugzilla2gitlab creates issues and comments in GitLab with the user
 accounts specified in ``user_mappings.yml``, perserving the integrity of
 the original Bugzilla commenter. This, however, may not always be
 possible. In
-`tests/test\_data/config/user\_mappings.yml <tests/test_data/config/user_mappings.yml>`__,
-users with the designation "bugzilla" may have left the organization and
+`tests/test_data/config/user_mappings.yml <tests/test_data/config/user_mappings.yml>`__,
+users with the designation “bugzilla” may have left the organization and
 therefore not have current GitLab accounts, or might simply be machine
-users. Comments for such users will be left under a generic "bugzilla"
-account. bugzilla2gitlab doesn't create any new user accounts. All of
+users. Comments for such users will be left under a generic “bugzilla”
+account. bugzilla2gitlab doesn’t create any new user accounts. All of
 the accounts specified in ``user_mappings.yml`` must already exist in
 your GitLab installation.
 
 The default table created in the issue description by bugzilla2gitlab
 looks like this:
 
-+------+------+
-| Bugz | `570 |
-| illa | 755  |
-| Link | <htt |
-|      | ps:/ |
-|      | /bug |
-|      | zill |
-|      | a.mo |
-|      | zill |
-|      | a.or |
-|      | g/sh |
-|      | ow_b |
-|      | ug.c |
-|      | gi?i |
-|      | d=57 |
-|      | 0755 |
-|      | >`__ |
-+------+------+
-| Crea | Jun  |
-| ted  | 08,  |
-| on   | 2010 |
-|      | 10:2 |
-|      | 5    |
-+------+------+
-| Vers | unsp |
-| ion  | ecif |
-|      | ied  |
-+------+------+
-| OS   | All  |
-+------+------+
-| Arch | All  |
-| itec |      |
-| ture |      |
-+------+------+
-| Atta | `a\_ |
-| chme | PHP\ |
-| nts  | _pla |
-|      | y\_s |
-|      | crip |
-|      | t\_t |
-|      | o\_d |
-|      | emon |
-|      | stra |
-|      | te\_ |
-|      | how\ |
-|      | _the |
-|      | \_br |
-|      | owse |
-|      | r\_r |
-|      | eque |
-|      | sts\ |
-|      | _vid |
-|      | eos  |
-|      | </up |
-|      | load |
-|      | s/e5 |
-|      | 21dd |
-|      | 042d |
-|      | c4cf |
-|      | d3d4 |
-|      | 9151 |
-|      | d87d |
-|      | ee80 |
-|      | 58/a |
-|      | _PHP |
-|      | _pla |
-|      | y_sc |
-|      | ript |
-|      | _to_ |
-|      | demo |
-|      | nstr |
-|      | ate_ |
-|      | how_ |
-|      | the_ |
-|      | brow |
-|      | ser_ |
-|      | requ |
-|      | ests |
-|      | _vid |
-|      | eos> |
-|      | `__  |
-+------+------+
-| Repo | mozi |
-| rter | lla  |
-+------+------+
++-----------------------------------+-----------------------------------+
+| Bugzilla Link                     | `570755 <https://bugzilla.mozilla |
+|                                   | .org/show_bug.cgi?id=570755>`__   |
++-----------------------------------+-----------------------------------+
+| Created on                        | Jun 08, 2010 10:25                |
++-----------------------------------+-----------------------------------+
+| Version                           | unspecified                       |
++-----------------------------------+-----------------------------------+
+| OS                                | All                               |
++-----------------------------------+-----------------------------------+
+| Architecture                      | All                               |
++-----------------------------------+-----------------------------------+
+| Attachments                       | `a_PHP_play_script_to_demonstrate |
+|                                   | _how_the_browser_requests_videos  |
+|                                   | </uploads/e521dd042dc4cfd3d49151d |
+|                                   | 87dee8058/a_PHP_play_script_to_de |
+|                                   | monstrate_how_the_browser_request |
+|                                   | s_videos>`__                      |
++-----------------------------------+-----------------------------------+
+| Reporter                          | mozilla                           |
++-----------------------------------+-----------------------------------+
 
 To modify this table, take a look at ``create_description`` in
 `models.py </bugzilla2gitlab/models.py#L92>`__.
@@ -223,8 +159,8 @@ Bugzilla
 
 This program relies on being able to fetch bug data by simply appending
 ``&ctype=xml`` to the end of the bugzilla bug url, and then parsing the
-resultant xml. If this trick doesn't work on your bugzilla installation,
-then bugzilla2gitlab probably won't work for you.
+resultant xml. If this trick doesn’t work on your bugzilla installation,
+then bugzilla2gitlab probably won’t work for you.
 
 Caveats
 -------
@@ -237,18 +173,11 @@ notifications (global and group-specific) just prior to the running of
 this script. This can be done through the `gitlab
 UI <https://gitlab.com/profile/notifications>`__.
 
-Tests
------
+Demo
+----
 
-There is currently a need for more tests. The tests that are in place
-can be run by:
-
-::
-
-    ./runtests tests
-
-If you want to test this library on a non-production GitLab instance, I
-recommend starting up a `one-click GitLab droplet from
+If you want to test out this library on a non-production GitLab
+instance, I recommend starting up a `one-click GitLab droplet from
 DigitalOcean <https://www.digitalocean.com/features/one-click-apps/gitlab/>`__.
 From there, you can create a code repository, add some user accounts,
 and take bugzilla2gitlab for a spin.

@@ -7,7 +7,7 @@
 - [Usage](#usage)
 - [How it works](#how-it-works)
 - [Caveats](#caveats)
-- [Tests](#tests)
+- [Demo](#demo)
 - [Contributing](#contributing)
 
 ## Introduction
@@ -113,14 +113,9 @@ This program relies on being able to fetch bug data by simply appending `&ctype=
 
 Every comment or mention in GitLab typically sends a notification. This is true even for comments/issues created programatically. To avoid users inboxes being flooded with meaningless email notifications and avoid overwhelming your SMTP servers, GitLab users should disable all email notifications (global and group-specific) just prior to the running of this script. This can be done through the [gitlab UI](https://gitlab.com/profile/notifications).
 
-## Tests
+## Demo
 
-There is currently a need for more tests. The tests that are in place can be run by:
-```
-./runtests tests
-```
-
-If you want to test this library on a non-production GitLab instance, I recommend starting up a [one-click GitLab droplet from DigitalOcean](https://www.digitalocean.com/features/one-click-apps/gitlab/). From there, you can create a code repository, add some user accounts, and take bugzilla2gitlab for a spin.
+If you want to test out this library on a non-production GitLab instance, I recommend starting up a [one-click GitLab droplet from DigitalOcean](https://www.digitalocean.com/features/one-click-apps/gitlab/). From there, you can create a code repository, add some user accounts, and take bugzilla2gitlab for a spin.
 
 ## Contributing
 
