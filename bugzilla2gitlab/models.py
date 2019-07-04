@@ -147,7 +147,7 @@ class Issue(object):
         comment0 = fields["long_desc"][0]
         if (fields["reporter"] == comment0["who"] and comment0["thetext"]):
             ext_description += "\n## Extended Description \n"
-            ext_description += "\n\n".join(re.split("\n*", comment0["thetext"]))
+            ext_description += "\n\n".join(re.split("\n+", comment0["thetext"]))
             self.update_attachments(fields["reporter"], comment0, attachments)
             del fields["long_desc"][0]
 
