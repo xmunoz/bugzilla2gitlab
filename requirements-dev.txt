@@ -1,5 +1,5 @@
 -r requirements.txt
-bandit==1.4.0
-flake8==3.5.0
-flake8-import-order==0.16
-pytest==3.3.0
+bandit>=1.4.0
+flake8>=3.5.0
+flake8-import-order>=0.16
+pytest>=3.3.0
