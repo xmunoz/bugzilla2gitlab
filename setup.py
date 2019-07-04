@@ -1,15 +1,13 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 from setuptools import setup
 
 with open("bugzilla2gitlab/version.py") as f:
     exec(f.read())
 
-try:
-    import pypandoc
-    long_description = pypandoc.convert('README.md', 'rst')
-except(IOError, ImportError):
-    long_description = open('README').read()
+with open('README.md') as f:
+    long_description = f.read()
 
 with open('requirements.txt') as requirements:
     required = requirements.read().splitlines()
@@ -20,8 +18,9 @@ kwargs = {
     "packages": ["bugzilla2gitlab"],
     "description": "An opinionated Bugzilla to Gitlab Issues bug migration tool",
     "long_description": long_description,
-    "author": "Cristina Munoz",
-    "maintainer": "Cristina Munoz",
+    "long_description_content_type": 'text/markdown',
+    "author": "Cristina Muñoz",
+    "maintainer": "Cristina Muñoz",
     "author_email": "hi@xmunoz.com",
     "maintainer_email": "hi@xmunoz.com",
     "license": "MIT",
