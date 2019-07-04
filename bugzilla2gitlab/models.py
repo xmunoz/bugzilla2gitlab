@@ -287,7 +287,7 @@ class Attachment(object):
 
     @classmethod
     def parse_file_description(cls, comment):
-        regex = "^Created attachment (\d*)\s?(.*)$"
+        regex = r"^Created attachment (\d*)\s?(.*)$"
         matches = re.match(regex, comment, flags=re.M)
         if not matches:
             raise Exception("Failed to match comment string: {}".format(comment))
@@ -299,7 +299,7 @@ class Attachment(object):
             raise Exception(u"No file name returned for attachment {}"
                             .format(self.file_description))
         # Content-disposition: application/zip; filename="mail_route.zip"
-        regex = "^.*; filename=\"(.*)\"$"
+        regex = r"^.*; filename=\"(.*)\"$"
         matches = re.match(regex, headers['Content-disposition'], flags=re.M)
         if not matches:
             raise Exception("Failed to match file name for string: {}"
@@ -311,7 +311,7 @@ class Attachment(object):
             raise Exception(u"No markdown returned for upload of attachment {}"
                             .format(self.file_description))
         # ![mail_route.zip](/uploads/e943e69eb2478529f2f1c7c7ea00fb46/mail_route.zip)
-        regex = "^!?\[.*\]\((.*)\)$"
+        regex = r"^!?\[.*\]\((.*)\)$"
         matches = re.match(regex, attachment["markdown"], flags=re.M)
         if not matches:
             raise Exception("Failed to match upload link for string: {}"
