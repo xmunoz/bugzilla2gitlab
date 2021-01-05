@@ -33,7 +33,7 @@ pip install -r requirements.txt
 pip install .
 ```
 
-bugzilla2gitlab is compatible with python2.7, 3.4, 3.5 and 3.6.
+bugzilla2gitlab is compatible with python3.5, 3.6, 3.7, and 3.8.
 
 ## Usage
 
