@@ -1,4 +1,4 @@
-[![PyPI version](https://badge.fury.io/py/bugzilla2gitlab.svg)](http://badge.fury.io/py/bugzilla2gitlab) [![Build Status](https://travis-ci.org/xmunoz/bugzilla2gitlab.svg?branch=master)](https://travis-ci.org/xmunoz/bugzilla2gitlab)
+[![PyPI version](https://badge.fury.io/py/bugzilla2gitlab.svg)](http://badge.fury.io/py/bugzilla2gitlab) [![Build Status](https://travis-ci.com/xmunoz/bugzilla2gitlab.svg?branch=master)](https://travis-ci.com/xmunoz/bugzilla2gitlab)
 
 # bugzilla2gitlab
 
@@ -26,7 +26,7 @@ More than likely, you will need to roll up your sleaves and hack on the package 
 ```
 git clone git@github.com:xmunoz/bugzilla2gitlab.git
 cd bugzilla2gitlab
-virtualenv venv
+python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 # installs this package locally
