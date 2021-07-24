@@ -12,7 +12,7 @@ Config = namedtuple('Config', ["gitlab_base_url", "gitlab_project_id",
                                "default_gitlab_labels", "datetime_format_string",
                                "map_operating_system", "map_keywords", "keywords_to_skip",
                                "map_milestones", "milestones_to_skip", "gitlab_milestones",
-                               "dry_run", "include_bugzilla_link", "verify"])
+                               "dry_run", "include_bugzilla_link", "use_bugzilla_id", "verify"])
 
 
 def get_config(path):

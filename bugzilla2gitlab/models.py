@@ -69,6 +69,7 @@ class Issue(object):
         self.created_at = format_utc(fields["creation_ts"])
         self.status = fields["bug_status"]
         self.create_labels(fields["component"], fields.get("op_sys"), fields.get("keywords"))
+        self.bug_id = fields["bug_id"]
         milestone = fields["target_milestone"]
         if conf.map_milestones and milestone not in conf.milestones_to_skip:
             self.create_milestone(milestone)
@@ -202,7 +203,15 @@ class Issue(object):
         self.validate()
         url = "{}/projects/{}/issues".format(conf.gitlab_base_url, conf.gitlab_project_id)
         data = {k: v for k, v in self.__dict__.items() if k in self.data_fields}
+
+        if conf.use_bugzilla_id is True:
+            print("Using original issue id")
+            data["iid"] = self.bug_id
+
         self.headers["sudo"] = self.sudo
+
+        print(self.headers)
+        print(data)
 
         response = _perform_request(url, "post", headers=self.headers, data=data, json=True,
                                     dry_run=conf.dry_run, verify=conf.verify)
@@ -213,6 +222,7 @@ class Issue(object):
             return
 
         self.id = response["iid"]
+        print("created id: %s" % self.id)
 
     def close(self):
         url = "{}/projects/{}/issues/{}".format(conf.gitlab_base_url, conf.gitlab_project_id,
