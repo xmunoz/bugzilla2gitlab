@@ -107,7 +107,7 @@ class Issue(object):
         if milestone not in conf.gitlab_milestones:
             url = "{}/projects/{}/milestones".format(conf.gitlab_base_url, conf.gitlab_project_id)
             response = _perform_request(
-                url, "post", headers=self.headers, data={"title": milestone})
+                url, "post", headers=self.headers, data={"title": milestone}, verify=conf.verify)
             conf.gitlab_milestones[milestone] = response["id"]
 
         self.milestone_id = conf.gitlab_milestones[milestone]
@@ -205,7 +205,7 @@ class Issue(object):
         self.headers["sudo"] = self.sudo
 
         response = _perform_request(url, "post", headers=self.headers, data=data, json=True,
-                                    dry_run=conf.dry_run)
+                                    dry_run=conf.dry_run, verify=conf.verify)
 
         if conf.dry_run:
             # assign a random number so that program can continue
@@ -222,7 +222,8 @@ class Issue(object):
         }
         self.headers["sudo"] = self.sudo
 
-        _perform_request(url, "put", headers=self.headers, data=data, dry_run=conf.dry_run)
+        _perform_request(url, "put", headers=self.headers, data=data, dry_run=conf.dry_run,
+                         verify=conf.verify)
 
 
 class Comment(object):
@@ -273,7 +274,7 @@ class Comment(object):
         data = {k: v for k, v in self.__dict__.items() if k in self.data_fields}
 
         _perform_request(url, "post", headers=self.headers, data=data, json=True,
-                         dry_run=conf.dry_run)
+                         dry_run=conf.dry_run, verify=conf.verify)
 
 
 class Attachment(object):
@@ -320,13 +321,13 @@ class Attachment(object):
 
     def save(self):
         url = "{}/attachment.cgi?id={}".format(conf.bugzilla_base_url, self.id)
-        result = _perform_request(url, "get", json=False)
+        result = _perform_request(url, "get", json=False, verify=conf.verify)
         filename = self.parse_file_name(result.headers)
 
         url = "{}/projects/{}/uploads".format(conf.gitlab_base_url, conf.gitlab_project_id)
         f = {"file": (filename, result.content)}
         attachment = _perform_request(url, "post", headers=self.headers, files=f, json=True,
-                                      dry_run=conf.dry_run)
+                                      dry_run=conf.dry_run, verify=conf.verify)
         # For dry run, nothing is uploaded, so upload link is faked just to let the process continue
         upload_link = self.file_description if conf.dry_run else self.parse_upload_link(attachment)
 
