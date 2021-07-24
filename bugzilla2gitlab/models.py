@@ -210,9 +210,6 @@ class Issue(object):
 
         self.headers["sudo"] = self.sudo
 
-        print(self.headers)
-        print(data)
-
         response = _perform_request(url, "post", headers=self.headers, data=data, json=True,
                                     dry_run=conf.dry_run, verify=conf.verify)
 
