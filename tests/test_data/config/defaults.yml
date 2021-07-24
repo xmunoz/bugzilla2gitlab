@@ -10,10 +10,11 @@ gitlab_base_url: "https://git.example.com/api/v4"
 # Enable tls certification verification. Disable for local development.
 verify: true
 
-# create gitlab issue with the same id as bugzilla ticket number. Issue id is
-# not auto generated.  The group members which are mapped in the user mappings
-# need to be defined as project owners for this to work. Otherwise the API will
-# ignore IID setting and auto generate the issue id.
+# Auto-generate the issue id in Gitlab. If set to `true`, create a Gitlab issue with
+# the same id as the Bugzilla ticket number.  The group members which are 
+# mapped in the user mappings need to be defined as project owners for this
+# to work properly. Otherwise the Gitlab API will ignore the `iid` setting fallback
+# to the default behavior (i.e. auto-generate the issue id).
 use_bugzilla_id: false
 
 # The gitlab project id
