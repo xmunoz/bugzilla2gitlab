@@ -13,8 +13,8 @@ verify: true
 # Auto-generate the issue id in Gitlab. If set to `true`, create a Gitlab issue with
 # the same id as the Bugzilla ticket number.  The group members which are 
 # mapped in the user mappings need to be defined as project owners for this
-# to work properly. Otherwise the Gitlab API will ignore the `iid` setting fallback
-# to the default behavior (i.e. auto-generate the issue id).
+# to work properly. Otherwise the Gitlab API will silently ignore the `iid` setting 
+# and fallback to the default behavior (i.e. auto-generate the issue id).
 use_bugzilla_id: false
 
 # The gitlab project id
