@@ -33,7 +33,7 @@ pip install -r requirements.txt
 pip install .
 ```
 
-bugzilla2gitlab is compatible with python3.5, 3.6, 3.7, and 3.8.
+bugzilla2gitlab is compatible with python 3.6, 3.7, 3.8, and 3.9.
 
 ## Usage
 
@@ -73,7 +73,7 @@ To begin using bugzilla2gitlab, the following list of configuration files is req
 - `user_mappings.yml`: key, value pairs of Bugzilla usernames to GitLab users
 - `component_mappings.yml`: key, value pairs of Bugzilla components to Gitlab labels
 
-Samples of all of these files with documentation for each configuration variable can be found in `tests/test_data/config`.
+Samples of all of these files with documentation for each configuration variable can be found in [tests/test_data/config](tests/test_data/config).
 
 bugzilla2gitlab creates issues and comments in GitLab with the user accounts specified in `user_mappings.yml`, perserving the integrity of the original Bugzilla commenter. This, however, may not always be possible. In [tests/test_data/config/user_mappings.yml](tests/test_data/config/user_mappings.yml), users with the designation "bugzilla" may have left the organization and therefore not have current GitLab accounts, or might simply be machine users. Comments for such users will be left under a generic "bugzilla" account. bugzilla2gitlab doesn't create any new user accounts. All of the accounts specified in `user_mappings.yml` must already exist in your GitLab installation.
 

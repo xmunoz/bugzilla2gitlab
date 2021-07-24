@@ -5,28 +5,56 @@ import yaml
 
 from .utils import _perform_request
 
-Config = namedtuple('Config', ["gitlab_base_url", "gitlab_project_id",
-                               "bugzilla_base_url", "bugzilla_user", "bugzilla_auto_reporter",
-                               "bugzilla_closed_states", "default_headers", "component_mappings",
-                               "bugzilla_users", "gitlab_users", "gitlab_misc_user",
-                               "default_gitlab_labels", "datetime_format_string",
-                               "map_operating_system", "map_keywords", "keywords_to_skip",
-                               "map_milestones", "milestones_to_skip", "gitlab_milestones",
-                               "dry_run", "include_bugzilla_link", "use_bugzilla_id", "verify"])
+Config = namedtuple(
+    "Config",
+    [
+        "gitlab_base_url",
+        "gitlab_project_id",
+        "bugzilla_base_url",
+        "bugzilla_user",
+        "bugzilla_auto_reporter",
+        "bugzilla_closed_states",
+        "default_headers",
+        "component_mappings",
+        "bugzilla_users",
+        "gitlab_users",
+        "gitlab_misc_user",
+        "default_gitlab_labels",
+        "datetime_format_string",
+        "map_operating_system",
+        "map_keywords",
+        "keywords_to_skip",
+        "map_milestones",
+        "milestones_to_skip",
+        "gitlab_milestones",
+        "dry_run",
+        "include_bugzilla_link",
+        "use_bugzilla_id",
+        "verify",
+    ],
+)
 
 
 def get_config(path):
     configuration = {}
     configuration.update(_load_defaults(path))
-    configuration.update(_load_user_id_cache(path, configuration["gitlab_base_url"],
-                                             configuration["default_headers"],
-                                             configuration['verify']))
+    configuration.update(
+        _load_user_id_cache(
+            path,
+            configuration["gitlab_base_url"],
+            configuration["default_headers"],
+            configuration["verify"],
+        )
+    )
     if configuration["map_milestones"]:
         configuration.update(
-            _load_milestone_id_cache(configuration["gitlab_project_id"],
-                                     configuration["gitlab_base_url"],
-                                     configuration["default_headers"],
-                                     configuration['verify']))
+            _load_milestone_id_cache(
+                configuration["gitlab_project_id"],
+                configuration["gitlab_base_url"],
+                configuration["default_headers"],
+                configuration["verify"],
+            )
+        )
     configuration.update(_load_component_mappings(path))
     return Config(**configuration)
 
@@ -47,9 +75,9 @@ def _load_defaults(path):
 
 
 def _load_user_id_cache(path, gitlab_url, gitlab_headers, verify):
-    '''
+    """
     Load cache of GitLab usernames and ids
-    '''
+    """
     print("Loading user cache...")
     with open(os.path.join(path, "user_mappings.yml")) as f:
         bugzilla_mapping = yaml.safe_load(f)
@@ -71,9 +99,9 @@ def _load_user_id_cache(path, gitlab_url, gitlab_headers, verify):
 
 
 def _load_milestone_id_cache(project_id, gitlab_url, gitlab_headers, verify):
-    '''
+    """
     Load cache of GitLab milestones and ids
-    '''
+    """
     print("Loading milestone cache...")
 
     gitlab_milestones = {}

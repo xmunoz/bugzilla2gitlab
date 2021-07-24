@@ -6,37 +6,38 @@ conf = None
 
 
 class IssueThread(object):
-    '''
+    """
     Everything related to an issue in GitLab, e.g. the issue itself and subsequent comments.
-    '''
+    """
+
     def __init__(self, config, fields):
         global conf
         conf = config
         self.load_objects(fields)
 
     def load_objects(self, fields):
-        '''
+        """
         Load the issue object and the comment objects.
         If conf.dry_run=False, then Attachments are created in GitLab in this step.
-        '''
+        """
         self.issue = Issue(fields)
         self.comments = []
-        '''
+        """
         fields["long_desc"] gets peared down in Issue creation (above). This is because bugzilla
         lacks the concept of an issue description, so the first comment is harvested for
         the issue description, as well as any subsequent comments that are simply attachments
         from the original reporter. What remains below should be a list of genuine comments.
-        '''
+        """
 
         for comment_fields in fields["long_desc"]:
             if comment_fields.get("thetext"):
                 self.comments.append(Comment(comment_fields))
 
     def save(self):
-        '''
+        """
         Save the issue and all of the comments to GitLab.
         If conf.dry_run=True, then only the HTTP request that would be made is printed.
-        '''
+        """
         self.issue.save()
 
         for comment in self.comments:
@@ -49,12 +50,20 @@ class IssueThread(object):
 
 
 class Issue(object):
-    '''
+    """
     The issue model
-    '''
+    """
+
     required_fields = ["sudo", "title", "description"]
-    data_fields = ["sudo", "created_at", "title", "description", "assignee_ids", "milestone_id",
-                   "labels"]
+    data_fields = [
+        "sudo",
+        "created_at",
+        "title",
+        "description",
+        "assignee_ids",
+        "milestone_id",
+        "labels",
+    ]
 
     def __init__(self, bugzilla_fields):
         self.headers = conf.default_headers
@@ -65,10 +74,14 @@ class Issue(object):
     def load_fields(self, fields):
         self.title = fields["short_desc"]
         self.sudo = conf.gitlab_users[conf.bugzilla_users[fields["reporter"]]]
-        self.assignee_ids = [conf.gitlab_users[conf.bugzilla_users[fields["assigned_to"]]]]
+        self.assignee_ids = [
+            conf.gitlab_users[conf.bugzilla_users[fields["assigned_to"]]]
+        ]
         self.created_at = format_utc(fields["creation_ts"])
         self.status = fields["bug_status"]
-        self.create_labels(fields["component"], fields.get("op_sys"), fields.get("keywords"))
+        self.create_labels(
+            fields["component"], fields.get("op_sys"), fields.get("keywords")
+        )
         self.bug_id = fields["bug_id"]
         milestone = fields["target_milestone"]
         if conf.map_milestones and milestone not in conf.milestones_to_skip:
@@ -76,10 +89,10 @@ class Issue(object):
         self.create_description(fields)
 
     def create_labels(self, component, operating_system, keywords):
-        '''
+        """
         Creates 4 types of labels: default labels listed in the configuration, component labels,
         operating system labels, and keyword labels.
-        '''
+        """
         labels = []
         if conf.default_gitlab_labels:
             labels.extend(conf.default_gitlab_labels)
@@ -89,7 +102,11 @@ class Issue(object):
             labels.append(component_label)
 
         # Do not create a label if the OS is other. That is a meaningless label.
-        if conf.map_operating_system and operating_system and operating_system != "Other":
+        if (
+            conf.map_operating_system
+            and operating_system
+            and operating_system != "Other"
+        ):
             labels.append(operating_system)
 
         if conf.map_keywords and keywords:
@@ -102,21 +119,28 @@ class Issue(object):
         self.labels = ",".join(labels)
 
     def create_milestone(self, milestone):
-        '''
+        """
         Looks up milestone id given its title or creates a new one.
-        '''
+        """
         if milestone not in conf.gitlab_milestones:
-            url = "{}/projects/{}/milestones".format(conf.gitlab_base_url, conf.gitlab_project_id)
+            url = "{}/projects/{}/milestones".format(
+                conf.gitlab_base_url, conf.gitlab_project_id
+            )
             response = _perform_request(
-                url, "post", headers=self.headers, data={"title": milestone}, verify=conf.verify)
+                url,
+                "post",
+                headers=self.headers,
+                data={"title": milestone},
+                verify=conf.verify,
+            )
             conf.gitlab_milestones[milestone] = response["id"]
 
         self.milestone_id = conf.gitlab_milestones[milestone]
 
     def create_description(self, fields):
-        '''
+        """
         An opinionated description body creator.
-        '''
+        """
         ext_description = ""
 
         # markdown table header
@@ -126,27 +150,33 @@ class Issue(object):
         if conf.include_bugzilla_link:
             bug_id = fields["bug_id"]
             link = "{}/show_bug.cgi?id={}".format(conf.bugzilla_base_url, bug_id)
-            self.description += markdown_table_row("Bugzilla Link",
-                                                   "[{}]({})".format(bug_id, link))
+            self.description += markdown_table_row(
+                "Bugzilla Link", "[{}]({})".format(bug_id, link)
+            )
 
-        formatted_dt = format_datetime(fields["creation_ts"], conf.datetime_format_string)
+        formatted_dt = format_datetime(
+            fields["creation_ts"], conf.datetime_format_string
+        )
         self.description += markdown_table_row("Created on", formatted_dt)
 
         if fields.get("resolution"):
             self.description += markdown_table_row("Resolution", fields["resolution"])
-            self.description += markdown_table_row("Resolved on",
-                                                   format_datetime(fields["delta_ts"],
-                                                                   conf.datetime_format_string))
+            self.description += markdown_table_row(
+                "Resolved on",
+                format_datetime(fields["delta_ts"], conf.datetime_format_string),
+            )
 
         self.description += markdown_table_row("Version", fields.get("version"))
         self.description += markdown_table_row("OS", fields.get("op_sys"))
-        self.description += markdown_table_row("Architecture", fields.get("rep_platform"))
+        self.description += markdown_table_row(
+            "Architecture", fields.get("rep_platform")
+        )
 
         # add first comment to the issue description
         attachments = []
         to_delete = []
         comment0 = fields["long_desc"][0]
-        if (fields["reporter"] == comment0["who"] and comment0["thetext"]):
+        if fields["reporter"] == comment0["who"] and comment0["thetext"]:
             ext_description += "\n## Extended Description \n"
             ext_description += "\n\n".join(re.split("\n+", comment0["thetext"]))
             self.update_attachments(fields["reporter"], comment0, attachments)
@@ -162,14 +192,18 @@ class Issue(object):
             del fields["long_desc"][i]
 
         if attachments:
-            self.description += markdown_table_row("Attachments", ", ".join(attachments))
+            self.description += markdown_table_row(
+                "Attachments", ", ".join(attachments)
+            )
 
         if ext_description:
             # for situations where the reporter is a generic or old user, specify the original
             # reporter in the description body
             if fields["reporter"] == conf.bugzilla_auto_reporter:
                 # try to get reporter email from the body
-                description, part, user_data = ext_description.rpartition("Submitter was ")
+                description, part, user_data = ext_description.rpartition(
+                    "Submitter was "
+                )
                 # partition found matching string
                 if part:
                     regex = r"^(\S*)\s?.*$"
@@ -182,9 +216,9 @@ class Issue(object):
             self.description += ext_description
 
     def update_attachments(self, reporter, comment, attachments):
-        '''
+        """
         Fetches attachments from comment if authored by reporter.
-        '''
+        """
         if comment.get("attachid") and comment.get("who") == reporter:
             filename = Attachment.parse_file_description(comment.get("thetext"))
             attachment_markdown = Attachment(comment.get("attachid"), filename).save()
@@ -201,7 +235,9 @@ class Issue(object):
 
     def save(self):
         self.validate()
-        url = "{}/projects/{}/issues".format(conf.gitlab_base_url, conf.gitlab_project_id)
+        url = "{}/projects/{}/issues".format(
+            conf.gitlab_base_url, conf.gitlab_project_id
+        )
         data = {k: v for k, v in self.__dict__.items() if k in self.data_fields}
 
         if conf.use_bugzilla_id is True:
@@ -210,8 +246,15 @@ class Issue(object):
 
         self.headers["sudo"] = self.sudo
 
-        response = _perform_request(url, "post", headers=self.headers, data=data, json=True,
-                                    dry_run=conf.dry_run, verify=conf.verify)
+        response = _perform_request(
+            url,
+            "post",
+            headers=self.headers,
+            data=data,
+            json=True,
+            dry_run=conf.dry_run,
+            verify=conf.verify,
+        )
 
         if conf.dry_run:
             # assign a random number so that program can continue
@@ -222,21 +265,28 @@ class Issue(object):
         print("Created issue with id: {}".format(self.id))
 
     def close(self):
-        url = "{}/projects/{}/issues/{}".format(conf.gitlab_base_url, conf.gitlab_project_id,
-                                                self.id)
+        url = "{}/projects/{}/issues/{}".format(
+            conf.gitlab_base_url, conf.gitlab_project_id, self.id
+        )
         data = {
             "state_event": "close",
         }
         self.headers["sudo"] = self.sudo
 
-        _perform_request(url, "put", headers=self.headers, data=data, dry_run=conf.dry_run,
-                         verify=conf.verify)
+        _perform_request(
+            url,
+            "put",
+            headers=self.headers,
+            data=data,
+            dry_run=conf.dry_run,
+            verify=conf.verify,
+        )
 
 
 class Comment(object):
-    '''
+    """
     The comment model
-    '''
+    """
 
     required_fields = ["sudo", "body", "issue_id"]
     data_fields = ["created_at", "body"]
@@ -251,9 +301,10 @@ class Comment(object):
         # if unable to comment as the original user, put username in comment body
         self.created_at = format_utc(fields["bug_when"])
         if conf.bugzilla_users[fields["who"]] == conf.gitlab_misc_user:
-            self.body = "By {} on {}\n\n".format(fields["who"],
-                                                 format_datetime(fields["bug_when"],
-                                                 conf.datetime_format_string))
+            self.body = "By {} on {}\n\n".format(
+                fields["who"],
+                format_datetime(fields["bug_when"], conf.datetime_format_string),
+            )
         else:
             self.body = format_datetime(fields["bug_when"], conf.datetime_format_string)
             self.body += "\n\n"
@@ -276,18 +327,27 @@ class Comment(object):
     def save(self):
         self.validate()
         self.headers["sudo"] = self.sudo
-        url = "{}/projects/{}/issues/{}/notes".format(conf.gitlab_base_url, conf.gitlab_project_id,
-                                                      self.issue_id)
+        url = "{}/projects/{}/issues/{}/notes".format(
+            conf.gitlab_base_url, conf.gitlab_project_id, self.issue_id
+        )
         data = {k: v for k, v in self.__dict__.items() if k in self.data_fields}
 
-        _perform_request(url, "post", headers=self.headers, data=data, json=True,
-                         dry_run=conf.dry_run, verify=conf.verify)
+        _perform_request(
+            url,
+            "post",
+            headers=self.headers,
+            data=data,
+            json=True,
+            dry_run=conf.dry_run,
+            verify=conf.verify,
+        )
 
 
 class Attachment(object):
-    '''
+    """
     The attachment model
-    '''
+    """
+
     def __init__(self, bugzilla_attachment_id, file_description):
         self.id = bugzilla_attachment_id
         self.file_description = file_description
@@ -303,27 +363,37 @@ class Attachment(object):
 
     def parse_file_name(self, headers):
         # Use real filename to store attachment but descriptive name for issue text
-        if 'Content-disposition' not in headers:
-            raise Exception(u"No file name returned for attachment {}"
-                            .format(self.file_description))
+        if "Content-disposition" not in headers:
+            raise Exception(
+                u"No file name returned for attachment {}".format(self.file_description)
+            )
         # Content-disposition: application/zip; filename="mail_route.zip"
         regex = r"^.*; filename=\"(.*)\"$"
-        matches = re.match(regex, headers['Content-disposition'], flags=re.M)
+        matches = re.match(regex, headers["Content-disposition"], flags=re.M)
         if not matches:
-            raise Exception("Failed to match file name for string: {}"
-                            .format(headers['Content-disposition']))
+            raise Exception(
+                "Failed to match file name for string: {}".format(
+                    headers["Content-disposition"]
+                )
+            )
         return matches.group(1)
 
     def parse_upload_link(self, attachment):
         if not (attachment and attachment["markdown"]):
-            raise Exception(u"No markdown returned for upload of attachment {}"
-                            .format(self.file_description))
+            raise Exception(
+                u"No markdown returned for upload of attachment {}".format(
+                    self.file_description
+                )
+            )
         # ![mail_route.zip](/uploads/e943e69eb2478529f2f1c7c7ea00fb46/mail_route.zip)
         regex = r"^!?\[.*\]\((.*)\)$"
         matches = re.match(regex, attachment["markdown"], flags=re.M)
         if not matches:
-            raise Exception("Failed to match upload link for string: {}"
-                            .format(attachment["markdown"]))
+            raise Exception(
+                "Failed to match upload link for string: {}".format(
+                    attachment["markdown"]
+                )
+            )
         return matches.group(1)
 
     def save(self):
@@ -331,17 +401,32 @@ class Attachment(object):
         result = _perform_request(url, "get", json=False, verify=conf.verify)
         filename = self.parse_file_name(result.headers)
 
-        url = "{}/projects/{}/uploads".format(conf.gitlab_base_url, conf.gitlab_project_id)
+        url = "{}/projects/{}/uploads".format(
+            conf.gitlab_base_url, conf.gitlab_project_id
+        )
         f = {"file": (filename, result.content)}
-        attachment = _perform_request(url, "post", headers=self.headers, files=f, json=True,
-                                      dry_run=conf.dry_run, verify=conf.verify)
+        attachment = _perform_request(
+            url,
+            "post",
+            headers=self.headers,
+            files=f,
+            json=True,
+            dry_run=conf.dry_run,
+            verify=conf.verify,
+        )
         # For dry run, nothing is uploaded, so upload link is faked just to let the process continue
-        upload_link = self.file_description if conf.dry_run else self.parse_upload_link(attachment)
+        upload_link = (
+            self.file_description
+            if conf.dry_run
+            else self.parse_upload_link(attachment)
+        )
 
         return u"[{}]({})".format(self.file_description, upload_link)
 
 
 def validate_user(bugzilla_user):
     if bugzilla_user not in conf.bugzilla_users:
-        raise Exception("Bugzilla user `{}` not found in user_mappings.yml. "
-                        "Please add them before continuing.".format(bugzilla_user))
+        raise Exception(
+            "Bugzilla user `{}` not found in user_mappings.yml. "
+            "Please add them before continuing.".format(bugzilla_user)
+        )

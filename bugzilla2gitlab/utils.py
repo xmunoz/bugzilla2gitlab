@@ -8,11 +8,20 @@ import requests
 session = None
 
 
-def _perform_request(url, method, data={}, params={}, headers={}, files={}, json=True,
-                     dry_run=False, verify=True):
-    '''
+def _perform_request(
+    url,
+    method,
+    data={},
+    params={},
+    headers={},
+    files={},
+    json=True,
+    dry_run=False,
+    verify=True,
+):
+    """
     Utility method to perform an HTTP request.
-    '''
+    """
     if dry_run and method != "get":
         msg = "{} {} dry_run".format(url, method)
         print(msg)
@@ -39,33 +48,33 @@ def _perform_request(url, method, data={}, params={}, headers={}, files={}, json
 
 
 def markdown_table_row(key, value):
-    '''
+    """
     Create a row in a markdown table.
-    '''
+    """
     return u"| {} | {} |\n".format(key, value)
 
 
 def format_datetime(datestr, formatting):
-    '''
+    """
     Apply a dateime format to a string, according to the formatting string.
-    '''
+    """
     parsed_dt = dateutil.parser.parse(datestr)
     return parsed_dt.strftime(formatting)
 
 
 def format_utc(datestr):
-    '''
+    """
     Convert dateime string to UTC format recognized by gitlab.
-    '''
+    """
     parsed_dt = dateutil.parser.parse(datestr)
     utc_dt = parsed_dt.astimezone(pytz.utc)
     return utc_dt.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def get_bugzilla_bug(bugzilla_url, bug_id):
-    '''
+    """
     Read bug XML, return all fields and values in a dictionary.
-    '''
+    """
     bug_xml = _fetch_bug_content(bugzilla_url, bug_id)
     tree = ElementTree.fromstring(bug_xml)
 
@@ -96,9 +105,9 @@ def _fetch_bug_content(url, bug_id):
 
 
 def bugzilla_login(url, user):
-    '''
+    """
     Log in to Bugzilla as user, asking for password for a few times / untill success.
-    '''
+    """
     max_login_attempts = 3
     login_url = "{}/index.cgi".format(url)
     # CSRF protection bypass: GET, then POST
@@ -107,11 +116,13 @@ def bugzilla_login(url, user):
         response = _perform_request(
             login_url,
             "post",
-            headers={'Referer': login_url},
+            headers={"Referer": login_url},
             data={
-                'Bugzilla_login': user,
-                'Bugzilla_password': getpass("Bugzilla password for {}: ".format(user))},
-            json=False)
+                "Bugzilla_login": user,
+                "Bugzilla_password": getpass("Bugzilla password for {}: ".format(user)),
+            },
+            json=False,
+        )
         if response.cookies:
             break
         else:
@@ -121,20 +132,24 @@ def bugzilla_login(url, user):
 
 
 def validate_list(integer_list):
-    '''
+    """
     Ensure that the user-supplied input is a list of integers, or a list of strings
     that can be parsed as integers.
-    '''
+    """
     if not integer_list:
         raise Exception("No bugs to migrate! Call `migrate` with a list of bug ids.")
 
     if not isinstance(integer_list, list):
-        raise Exception("Expected a list of integers. Instead recieved "
-                        "a(n) {}".format(type(integer_list)))
+        raise Exception(
+            "Expected a list of integers. Instead recieved "
+            "a(n) {}".format(type(integer_list))
+        )
 
         for i in integer_list:
             try:
                 int(i)
             except ValueError:
-                raise Exception("{} is not able to be parsed as an integer, "
-                                "and is therefore an invalid bug id.".format(i))
+                raise Exception(
+                    "{} is not able to be parsed as an integer, "
+                    "and is therefore an invalid bug id.".format(i)
+                )
