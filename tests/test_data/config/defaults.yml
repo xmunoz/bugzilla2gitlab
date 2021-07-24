@@ -7,14 +7,14 @@ dry_run: true
 # gitlab api base url without trailing slash
 gitlab_base_url: "https://git.example.com/api/v4"
 
-# disable ssl cert verify
+# Enable tls certification verification. Disable for local development.
 verify: true
 
 # create gitlab issue with the same id as bugzilla ticket number. Issue id is
 # not auto generated.  The group members which are mapped in the user mappings
 # need to be defined as project owners for this to work. Otherwise the API will
 # ignore IID setting and auto generate the issue id.
-use_bugzilla_id: true
+use_bugzilla_id: false
 
 # The gitlab project id
 gitlab_project_id: 5
