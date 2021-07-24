@@ -2,23 +2,23 @@ import re
 
 from .utils import _perform_request, format_datetime, format_utc, markdown_table_row
 
-conf = None
+CONF = None
 
 
-class IssueThread(object):
+class IssueThread:
     """
     Everything related to an issue in GitLab, e.g. the issue itself and subsequent comments.
     """
 
     def __init__(self, config, fields):
-        global conf
-        conf = config
+        global CONF
+        CONF = config
         self.load_objects(fields)
 
     def load_objects(self, fields):
         """
         Load the issue object and the comment objects.
-        If conf.dry_run=False, then Attachments are created in GitLab in this step.
+        If CONF.dry_run=False, then Attachments are created in GitLab in this step.
         """
         self.issue = Issue(fields)
         self.comments = []
@@ -36,7 +36,7 @@ class IssueThread(object):
     def save(self):
         """
         Save the issue and all of the comments to GitLab.
-        If conf.dry_run=True, then only the HTTP request that would be made is printed.
+        If CONF.dry_run=True, then only the HTTP request that would be made is printed.
         """
         self.issue.save()
 
@@ -45,11 +45,11 @@ class IssueThread(object):
             comment.save()
 
         # close the issue in GitLab, if it is resolved in Bugzilla
-        if self.issue.status in conf.bugzilla_closed_states:
+        if self.issue.status in CONF.bugzilla_closed_states:
             self.issue.close()
 
 
-class Issue(object):
+class Issue:
     """
     The issue model
     """
@@ -66,16 +66,16 @@ class Issue(object):
     ]
 
     def __init__(self, bugzilla_fields):
-        self.headers = conf.default_headers
+        self.headers = CONF.default_headers
         validate_user(bugzilla_fields["reporter"])
         validate_user(bugzilla_fields["assigned_to"])
         self.load_fields(bugzilla_fields)
 
     def load_fields(self, fields):
         self.title = fields["short_desc"]
-        self.sudo = conf.gitlab_users[conf.bugzilla_users[fields["reporter"]]]
+        self.sudo = CONF.gitlab_users[CONF.bugzilla_users[fields["reporter"]]]
         self.assignee_ids = [
-            conf.gitlab_users[conf.bugzilla_users[fields["assigned_to"]]]
+            CONF.gitlab_users[CONF.bugzilla_users[fields["assigned_to"]]]
         ]
         self.created_at = format_utc(fields["creation_ts"])
         self.status = fields["bug_status"]
@@ -84,7 +84,7 @@ class Issue(object):
         )
         self.bug_id = fields["bug_id"]
         milestone = fields["target_milestone"]
-        if conf.map_milestones and milestone not in conf.milestones_to_skip:
+        if CONF.map_milestones and milestone not in CONF.milestones_to_skip:
             self.create_milestone(milestone)
         self.create_description(fields)
 
@@ -94,26 +94,26 @@ class Issue(object):
         operating system labels, and keyword labels.
         """
         labels = []
-        if conf.default_gitlab_labels:
-            labels.extend(conf.default_gitlab_labels)
+        if CONF.default_gitlab_labels:
+            labels.extend(CONF.default_gitlab_labels)
 
-        component_label = conf.component_mappings.get(component)
+        component_label = CONF.component_mappings.get(component)
         if component_label:
             labels.append(component_label)
 
         # Do not create a label if the OS is other. That is a meaningless label.
         if (
-            conf.map_operating_system
+            CONF.map_operating_system
             and operating_system
             and operating_system != "Other"
         ):
             labels.append(operating_system)
 
-        if conf.map_keywords and keywords:
+        if CONF.map_keywords and keywords:
             # Input: payload of XML element like this: <keywords>SECURITY, SUPPORT</keywords>
             # Bugzilla restriction: You may not use commas or whitespace in a keyword name.
             for k in keywords.replace(" ", "").split(","):
-                if not (conf.keywords_to_skip and k in conf.keywords_to_skip):
+                if not (CONF.keywords_to_skip and k in CONF.keywords_to_skip):
                     labels.append(k)
 
         self.labels = ",".join(labels)
@@ -122,20 +122,20 @@ class Issue(object):
         """
         Looks up milestone id given its title or creates a new one.
         """
-        if milestone not in conf.gitlab_milestones:
+        if milestone not in CONF.gitlab_milestones:
             url = "{}/projects/{}/milestones".format(
-                conf.gitlab_base_url, conf.gitlab_project_id
+                CONF.gitlab_base_url, CONF.gitlab_project_id
             )
             response = _perform_request(
                 url,
                 "post",
                 headers=self.headers,
                 data={"title": milestone},
-                verify=conf.verify,
+                verify=CONF.verify,
             )
-            conf.gitlab_milestones[milestone] = response["id"]
+            CONF.gitlab_milestones[milestone] = response["id"]
 
-        self.milestone_id = conf.gitlab_milestones[milestone]
+        self.milestone_id = CONF.gitlab_milestones[milestone]
 
     def create_description(self, fields):
         """
@@ -147,15 +147,15 @@ class Issue(object):
         self.description = markdown_table_row("", "")
         self.description += markdown_table_row("---", "---")
 
-        if conf.include_bugzilla_link:
+        if CONF.include_bugzilla_link:
             bug_id = fields["bug_id"]
-            link = "{}/show_bug.cgi?id={}".format(conf.bugzilla_base_url, bug_id)
+            link = "{}/show_bug.cgi?id={}".format(CONF.bugzilla_base_url, bug_id)
             self.description += markdown_table_row(
                 "Bugzilla Link", "[{}]({})".format(bug_id, link)
             )
 
         formatted_dt = format_datetime(
-            fields["creation_ts"], conf.datetime_format_string
+            fields["creation_ts"], CONF.datetime_format_string
         )
         self.description += markdown_table_row("Created on", formatted_dt)
 
@@ -163,7 +163,7 @@ class Issue(object):
             self.description += markdown_table_row("Resolution", fields["resolution"])
             self.description += markdown_table_row(
                 "Resolved on",
-                format_datetime(fields["delta_ts"], conf.datetime_format_string),
+                format_datetime(fields["delta_ts"], CONF.datetime_format_string),
             )
 
         self.description += markdown_table_row("Version", fields.get("version"))
@@ -199,9 +199,9 @@ class Issue(object):
         if ext_description:
             # for situations where the reporter is a generic or old user, specify the original
             # reporter in the description body
-            if fields["reporter"] == conf.bugzilla_auto_reporter:
+            if fields["reporter"] == CONF.bugzilla_auto_reporter:
                 # try to get reporter email from the body
-                description, part, user_data = ext_description.rpartition(
+                _, part, user_data = ext_description.rpartition(
                     "Submitter was "
                 )
                 # partition found matching string
@@ -210,7 +210,7 @@ class Issue(object):
                     email = re.match(regex, user_data, flags=re.M).group(1)
                     self.description += markdown_table_row("Reporter", email)
             # Add original reporter to the markdown table
-            elif conf.bugzilla_users[fields["reporter"]] == conf.gitlab_misc_user:
+            elif CONF.bugzilla_users[fields["reporter"]] == CONF.gitlab_misc_user:
                 self.description += markdown_table_row("Reporter", fields["reporter"])
 
             self.description += ext_description
@@ -236,11 +236,11 @@ class Issue(object):
     def save(self):
         self.validate()
         url = "{}/projects/{}/issues".format(
-            conf.gitlab_base_url, conf.gitlab_project_id
+            CONF.gitlab_base_url, CONF.gitlab_project_id
         )
         data = {k: v for k, v in self.__dict__.items() if k in self.data_fields}
 
-        if conf.use_bugzilla_id is True:
+        if CONF.use_bugzilla_id is True:
             print("Using original issue id")
             data["iid"] = self.bug_id
 
@@ -252,11 +252,11 @@ class Issue(object):
             headers=self.headers,
             data=data,
             json=True,
-            dry_run=conf.dry_run,
-            verify=conf.verify,
+            dry_run=CONF.dry_run,
+            verify=CONF.verify,
         )
 
-        if conf.dry_run:
+        if CONF.dry_run:
             # assign a random number so that program can continue
             self.id = 5
             return
@@ -266,7 +266,7 @@ class Issue(object):
 
     def close(self):
         url = "{}/projects/{}/issues/{}".format(
-            conf.gitlab_base_url, conf.gitlab_project_id, self.id
+            CONF.gitlab_base_url, CONF.gitlab_project_id, self.id
         )
         data = {
             "state_event": "close",
@@ -278,12 +278,12 @@ class Issue(object):
             "put",
             headers=self.headers,
             data=data,
-            dry_run=conf.dry_run,
-            verify=conf.verify,
+            dry_run=CONF.dry_run,
+            verify=CONF.verify,
         )
 
 
-class Comment(object):
+class Comment:
     """
     The comment model
     """
@@ -292,21 +292,21 @@ class Comment(object):
     data_fields = ["created_at", "body"]
 
     def __init__(self, bugzilla_fields):
-        self.headers = conf.default_headers
+        self.headers = CONF.default_headers
         validate_user(bugzilla_fields["who"])
         self.load_fields(bugzilla_fields)
 
     def load_fields(self, fields):
-        self.sudo = conf.gitlab_users[conf.bugzilla_users[fields["who"]]]
+        self.sudo = CONF.gitlab_users[CONF.bugzilla_users[fields["who"]]]
         # if unable to comment as the original user, put username in comment body
         self.created_at = format_utc(fields["bug_when"])
-        if conf.bugzilla_users[fields["who"]] == conf.gitlab_misc_user:
+        if CONF.bugzilla_users[fields["who"]] == CONF.gitlab_misc_user:
             self.body = "By {} on {}\n\n".format(
                 fields["who"],
-                format_datetime(fields["bug_when"], conf.datetime_format_string),
+                format_datetime(fields["bug_when"], CONF.datetime_format_string),
             )
         else:
-            self.body = format_datetime(fields["bug_when"], conf.datetime_format_string)
+            self.body = format_datetime(fields["bug_when"], CONF.datetime_format_string)
             self.body += "\n\n"
 
         # if this comment is actually an attachment, upload the attachment and add the
@@ -328,7 +328,7 @@ class Comment(object):
         self.validate()
         self.headers["sudo"] = self.sudo
         url = "{}/projects/{}/issues/{}/notes".format(
-            conf.gitlab_base_url, conf.gitlab_project_id, self.issue_id
+            CONF.gitlab_base_url, CONF.gitlab_project_id, self.issue_id
         )
         data = {k: v for k, v in self.__dict__.items() if k in self.data_fields}
 
@@ -338,12 +338,12 @@ class Comment(object):
             headers=self.headers,
             data=data,
             json=True,
-            dry_run=conf.dry_run,
-            verify=conf.verify,
+            dry_run=CONF.dry_run,
+            verify=CONF.verify,
         )
 
 
-class Attachment(object):
+class Attachment:
     """
     The attachment model
     """
@@ -351,7 +351,7 @@ class Attachment(object):
     def __init__(self, bugzilla_attachment_id, file_description):
         self.id = bugzilla_attachment_id
         self.file_description = file_description
-        self.headers = conf.default_headers
+        self.headers = CONF.default_headers
 
     @classmethod
     def parse_file_description(cls, comment):
@@ -397,12 +397,12 @@ class Attachment(object):
         return matches.group(1)
 
     def save(self):
-        url = "{}/attachment.cgi?id={}".format(conf.bugzilla_base_url, self.id)
-        result = _perform_request(url, "get", json=False, verify=conf.verify)
+        url = "{}/attachment.cgi?id={}".format(CONF.bugzilla_base_url, self.id)
+        result = _perform_request(url, "get", json=False, verify=CONF.verify)
         filename = self.parse_file_name(result.headers)
 
         url = "{}/projects/{}/uploads".format(
-            conf.gitlab_base_url, conf.gitlab_project_id
+            CONF.gitlab_base_url, CONF.gitlab_project_id
         )
         f = {"file": (filename, result.content)}
         attachment = _perform_request(
@@ -411,13 +411,13 @@ class Attachment(object):
             headers=self.headers,
             files=f,
             json=True,
-            dry_run=conf.dry_run,
-            verify=conf.verify,
+            dry_run=CONF.dry_run,
+            verify=CONF.verify,
         )
         # For dry run, nothing is uploaded, so upload link is faked just to let the process continue
         upload_link = (
             self.file_description
-            if conf.dry_run
+            if CONF.dry_run
             else self.parse_upload_link(attachment)
         )
 
@@ -425,7 +425,7 @@ class Attachment(object):
 
 
 def validate_user(bugzilla_user):
-    if bugzilla_user not in conf.bugzilla_users:
+    if bugzilla_user not in CONF.bugzilla_users:
         raise Exception(
             "Bugzilla user `{}` not found in user_mappings.yml. "
             "Please add them before continuing.".format(bugzilla_user)

@@ -11,6 +11,7 @@ The best way to start developing this project is to set up a virtualenv and inst
     virtualenv venv
     source venv/bin/activate
     pip install -r requirements-dev.txt
+    pip install .
 
 Run tests to confirm that everything is set up properly.
 

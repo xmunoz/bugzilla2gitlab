@@ -3,7 +3,7 @@ from .models import IssueThread
 from .utils import bugzilla_login, get_bugzilla_bug, validate_list
 
 
-class Migrator(object):
+class Migrator:
     def __init__(self, config_path):
         self.conf = get_config(config_path)
 

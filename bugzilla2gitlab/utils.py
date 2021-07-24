@@ -5,7 +5,7 @@ from defusedxml import ElementTree
 import pytz
 import requests
 
-session = None
+SESSION = None
 
 
 def _perform_request(
@@ -27,11 +27,11 @@ def _perform_request(
         print(msg)
         return 0
 
-    global session
-    if not session:
-        session = requests.Session()
+    global SESSION
+    if not SESSION:
+        SESSION = requests.Session()
 
-    func = getattr(session, method)
+    func = getattr(SESSION, method)
 
     if files:
         result = func(url, files=files, headers=headers, verify=verify)
@@ -41,8 +41,7 @@ def _perform_request(
     if result.status_code in [200, 201]:
         if json:
             return result.json()
-        else:
-            return result
+        return result
 
     raise Exception("{} failed requests: {}".format(result.status_code, result.reason))
 
@@ -125,8 +124,7 @@ def bugzilla_login(url, user):
         )
         if response.cookies:
             break
-        else:
-            print("Failed to log in (attempt {})".format(attempt + 1))
+        print("Failed to log in (attempt {})".format(attempt + 1))
     else:
         raise Exception("Failed to log in after {} attempts".format(max_login_attempts))
 
@@ -145,11 +143,11 @@ def validate_list(integer_list):
             "a(n) {}".format(type(integer_list))
         )
 
-        for i in integer_list:
-            try:
-                int(i)
-            except ValueError:
-                raise Exception(
-                    "{} is not able to be parsed as an integer, "
-                    "and is therefore an invalid bug id.".format(i)
-                )
+    for i in integer_list:
+        try:
+            int(i)
+        except ValueError:
+            raise Exception(
+                "{} is not able to be parsed as an integer, "
+                "and is therefore an invalid bug id.".format(i)
+            ) from ValueError

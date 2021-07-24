@@ -10,10 +10,10 @@ TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), "test_data")
 
 def test_config(monkeypatch):
 
-    def mockreturn(username, gitlab_url, headers):
+    def mockreturn(username, gitlab_url, headers, verify):
         return random.randint(0, 100)
 
-    def mockmilestones(project_id, gitlab_url, headers):
+    def mockmilestones(project_id, gitlab_url, headers, verify):
         return {"gitlab_milestones": {"Foo": 1}}
 
     # monkeypatch config method that performs API calls to return a random int instead
@@ -68,10 +68,10 @@ def test_config(monkeypatch):
 def test_Migrator(monkeypatch):
     bug_id = 103
 
-    def mock_getuserid(username, gitlab_url, headers):
+    def mock_getuserid(username, gitlab_url, headers, verify):
         return random.randint(0, 100)
 
-    def mock_loadmilestoneidcache(project_id, gitlab_url, headers):
+    def mock_loadmilestoneidcache(project_id, gitlab_url, headers, verify):
         return {"gitlab_milestones": {"Foo": 1}}
 
     def mock_fetchbugcontent(url, bug_id):

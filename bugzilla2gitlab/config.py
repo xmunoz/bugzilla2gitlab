@@ -119,8 +119,7 @@ def _get_user_id(username, gitlab_url, headers, verify):
     result = _perform_request(url, "get", headers=headers, verify=verify)
     if result and isinstance(result, list):
         return result[0]["id"]
-    else:
-        raise Exception("No gitlab account found for user {}".format(username))
+    raise Exception("No gitlab account found for user {}".format(username))
 
 
 def _load_component_mappings(path):
