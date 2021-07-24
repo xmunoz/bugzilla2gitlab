@@ -12,19 +12,21 @@ Config = namedtuple('Config', ["gitlab_base_url", "gitlab_project_id",
                                "default_gitlab_labels", "datetime_format_string",
                                "map_operating_system", "map_keywords", "keywords_to_skip",
                                "map_milestones", "milestones_to_skip", "gitlab_milestones",
-                               "dry_run", "include_bugzilla_link"])
+                               "dry_run", "include_bugzilla_link", "use_bugzilla_id", "verify"])
 
 
 def get_config(path):
     configuration = {}
     configuration.update(_load_defaults(path))
     configuration.update(_load_user_id_cache(path, configuration["gitlab_base_url"],
-                                             configuration["default_headers"]))
+                                             configuration["default_headers"],
+                                             configuration['verify']))
     if configuration["map_milestones"]:
         configuration.update(
             _load_milestone_id_cache(configuration["gitlab_project_id"],
                                      configuration["gitlab_base_url"],
-                                     configuration["default_headers"]))
+                                     configuration["default_headers"],
+                                     configuration['verify']))
     configuration.update(_load_component_mappings(path))
     return Config(**configuration)
 
@@ -44,7 +46,7 @@ def _load_defaults(path):
     return defaults
 
 
-def _load_user_id_cache(path, gitlab_url, gitlab_headers):
+def _load_user_id_cache(path, gitlab_url, gitlab_headers, verify):
     '''
     Load cache of GitLab usernames and ids
     '''
@@ -55,7 +57,7 @@ def _load_user_id_cache(path, gitlab_url, gitlab_headers):
     gitlab_users = {}
     for user in bugzilla_mapping:
         gitlab_username = bugzilla_mapping[user]
-        uid = _get_user_id(gitlab_username, gitlab_url, gitlab_headers)
+        uid = _get_user_id(gitlab_username, gitlab_url, gitlab_headers, verify=verify)
         gitlab_users[gitlab_username] = str(uid)
 
     mappings = {}
@@ -68,7 +70,7 @@ def _load_user_id_cache(path, gitlab_url, gitlab_headers):
     return mappings
 
 
-def _load_milestone_id_cache(project_id, gitlab_url, gitlab_headers):
+def _load_milestone_id_cache(project_id, gitlab_url, gitlab_headers, verify):
     '''
     Load cache of GitLab milestones and ids
     '''
@@ -76,7 +78,7 @@ def _load_milestone_id_cache(project_id, gitlab_url, gitlab_headers):
 
     gitlab_milestones = {}
     url = "{}/projects/{}/milestones".format(gitlab_url, project_id)
-    result = _perform_request(url, "get", headers=gitlab_headers)
+    result = _perform_request(url, "get", headers=gitlab_headers, verify=verify)
     if result and isinstance(result, list):
         for milestone in result:
             gitlab_milestones[milestone["title"]] = milestone["id"]
@@ -84,9 +86,9 @@ def _load_milestone_id_cache(project_id, gitlab_url, gitlab_headers):
     return {"gitlab_milestones": gitlab_milestones}
 
 
-def _get_user_id(username, gitlab_url, headers):
+def _get_user_id(username, gitlab_url, headers, verify):
     url = "{}/users?username={}".format(gitlab_url, username)
-    result = _perform_request(url, "get", headers=headers)
+    result = _perform_request(url, "get", headers=headers, verify=verify)
     if result and isinstance(result, list):
         return result[0]["id"]
     else:

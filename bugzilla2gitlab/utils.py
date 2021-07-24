@@ -9,7 +9,7 @@ session = None
 
 
 def _perform_request(url, method, data={}, params={}, headers={}, files={}, json=True,
-                     dry_run=False):
+                     dry_run=False, verify=True):
     '''
     Utility method to perform an HTTP request.
     '''
@@ -25,9 +25,9 @@ def _perform_request(url, method, data={}, params={}, headers={}, files={}, json
     func = getattr(session, method)
 
     if files:
-        result = func(url, files=files, headers=headers)
+        result = func(url, files=files, headers=headers, verify=verify)
     else:
-        result = func(url, params=params, data=data, headers=headers)
+        result = func(url, params=params, data=data, headers=headers, verify=verify)
 
     if result.status_code in [200, 201]:
         if json:
