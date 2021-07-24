@@ -219,7 +219,7 @@ class Issue(object):
             return
 
         self.id = response["iid"]
-        print("created id: %s" % self.id)
+        print("Created issue with id: {}".format(self.id))
 
     def close(self):
         url = "{}/projects/{}/issues/{}".format(conf.gitlab_base_url, conf.gitlab_project_id,
