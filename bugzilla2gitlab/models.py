@@ -201,9 +201,7 @@ class Issue:
             # reporter in the description body
             if fields["reporter"] == CONF.bugzilla_auto_reporter:
                 # try to get reporter email from the body
-                _, part, user_data = ext_description.rpartition(
-                    "Submitter was "
-                )
+                _, part, user_data = ext_description.rpartition("Submitter was ")
                 # partition found matching string
                 if part:
                     regex = r"^(\S*)\s?.*$"
