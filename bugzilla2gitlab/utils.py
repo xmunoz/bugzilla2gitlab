@@ -43,8 +43,11 @@ def _perform_request(
             return result.json()
         return result
 
-    raise Exception("{} failed requests: [{}] Response: [{}] Request data: [{}] Url: [{}] Headers: [{}]".format(
-        result.status_code, result.reason, result.content, data, url, headers))
+    raise Exception(
+        "{} failed requests: [{}] Response: [{}] Request data: [{}] Url: [{}] Headers: [{}]".format(
+            result.status_code, result.reason, result.content, data, url, headers
+        )
+    )
 
 
 def markdown_table_row(key, value):
