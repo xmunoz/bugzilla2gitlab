@@ -11,8 +11,6 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v2
-        with:
-          path: ${{ github.event.repository.name }}
       - name: Install release tooling
         run: pip install build twine
       - name: Create .pypirc file
