@@ -130,7 +130,8 @@ class Issue:
             Dont use sudo while creating milestones
             """
             header = self.headers
-            del header["sudo"]
+            if "sudo" in header:
+                del header["sudo"]
             response = _perform_request(
                 url,
                 "post",
