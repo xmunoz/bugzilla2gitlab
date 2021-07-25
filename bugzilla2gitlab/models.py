@@ -268,7 +268,7 @@ class Issue:
         can become quite messy
         """
         if CONF.use_bugzilla_id is True:
-            if self.id != self.bug_id:
+            if int(self.id) != int(self.bug_id):
                 raise Exception(
                     "Issue id [{}]!=[{}]: missing  owner permission for gitlab user id {}".format(
                     self.id, self.bug_id, self.sudo
