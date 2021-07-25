@@ -18,7 +18,7 @@ jobs:
       - name: Create .pypirc file
         env:
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
-        run: envsubst < .pypirc >.pypirc
+        run: envsubst < pypirc > .pypirc
       - name: Build the thing
         run: python -m build --sdist --wheel
       - name: Upload to PyPI
