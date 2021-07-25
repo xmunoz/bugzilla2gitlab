@@ -123,6 +123,7 @@ class Issue:
         Looks up milestone id given its title or creates a new one.
         """
         if milestone not in CONF.gitlab_milestones:
+            print("Create milestone: {}".format(milestone))
             url = "{}/projects/{}/milestones".format(
                 CONF.gitlab_base_url, CONF.gitlab_project_id
             )
