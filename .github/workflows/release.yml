@@ -1,0 +1,26 @@
+---
+name: Create PyPI Release
+
+on:
+  push:
+    tags:
+      - '*'
+jobs:
+  create_release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v2
+        with:
+          path: ${{ github.event.repository.name }}
+      - name: Install release tooling
+        run: pip install build twine
+      - name: Create .pypirc file
+        env:
+          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+        run: envsubst < .pypirc >.pypirc
+      - name: Build the thing
+        run: python -m build --sdist --wheel
+      - name: Upload to PyPI
+        run: twine upload dist/*
+
