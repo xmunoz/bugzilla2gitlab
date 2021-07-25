@@ -126,10 +126,15 @@ class Issue:
             url = "{}/projects/{}/milestones".format(
                 CONF.gitlab_base_url, CONF.gitlab_project_id
             )
+            """
+            Dont use sudo while creating milestones
+            """
+            header = self.headers
+            del header["sudo"]
             response = _perform_request(
                 url,
                 "post",
-                headers=self.headers,
+                headers=header,
                 data={"title": milestone},
                 verify=CONF.verify,
             )
