@@ -20,5 +20,5 @@ jobs:
       - name: Build the thing
         run: python -m build --sdist --wheel
       - name: Upload to PyPI
-        run: twine upload dist/*
+        run: twine upload --config-file .pypirc -r pypi dist/*
 
