@@ -173,6 +173,15 @@ class Issue:
             "Architecture", fields.get("rep_platform")
         )
 
+        if fields.get("dependson") is not None:
+            self.description += markdown_table_row(
+                "Depends On", "[{}]({})".format(fields.get("dependson"), link)
+            )
+        if fields.get("blocked") is not None:
+            self.description += markdown_table_row(
+                "Blocked by", "[{}]({})".format(fields.get("blocked"), link)
+            )
+
         # add first comment to the issue description
         attachments = []
         to_delete = []
