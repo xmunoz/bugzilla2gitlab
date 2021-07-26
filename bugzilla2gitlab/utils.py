@@ -81,7 +81,13 @@ def get_bugzilla_bug(bugzilla_url, bug_id):
     bug_xml = _fetch_bug_content(bugzilla_url, bug_id)
     tree = ElementTree.fromstring(bug_xml)
 
-    bug_fields = {"long_desc": [], "attachment": [], "cc": [], "dependson": []}
+    bug_fields = {
+        "long_desc": [],
+        "attachment": [],
+        "cc": [],
+        "dependson": [],
+        "blocked": [],
+    }
     for bug in tree:
         for field in bug:
             if field.tag in ("long_desc", "attachment"):
@@ -92,6 +98,8 @@ def get_bugzilla_bug(bugzilla_url, bug_id):
             elif field.tag == "cc":
                 bug_fields[field.tag].append(field.text)
             elif field.tag == "dependson":
+                bug_fields[field.tag].append(field.text)
+            elif field.tag == "blocked":
                 bug_fields[field.tag].append(field.text)
             else:
                 bug_fields[field.tag] = field.text
