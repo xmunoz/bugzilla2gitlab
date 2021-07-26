@@ -13,7 +13,11 @@ class Migrator:
         """
         validate_list(bug_list)
         if self.conf.bugzilla_user:
-            bugzilla_login(self.conf.bugzilla_base_url, self.conf.bugzilla_user)
+            bugzilla_login(
+                self.conf.bugzilla_base_url,
+                self.conf.bugzilla_user,
+                self.conf.bugzilla_password,
+            )
         for bug in bug_list:
             self.migrate_one(bug)
 

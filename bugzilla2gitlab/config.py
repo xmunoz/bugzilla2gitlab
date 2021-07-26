@@ -12,6 +12,7 @@ Config = namedtuple(
         "gitlab_project_id",
         "bugzilla_base_url",
         "bugzilla_user",
+        "bugzilla_password",
         "bugzilla_auto_reporter",
         "bugzilla_closed_states",
         "default_headers",

@@ -107,10 +107,14 @@ def _fetch_bug_content(url, bug_id):
     return response.content
 
 
-def bugzilla_login(url, user):
+def bugzilla_login(url, user, password):
     """
     Log in to Bugzilla as user, asking for password for a few times / untill success.
     """
+
+    if password is None:
+        password = getpass("Bugzilla password for {}: ".format(user))
+
     max_login_attempts = 3
     login_url = "{}/index.cgi".format(url)
     # CSRF protection bypass: GET, then POST
@@ -122,7 +126,7 @@ def bugzilla_login(url, user):
             headers={"Referer": login_url},
             data={
                 "Bugzilla_login": user,
-                "Bugzilla_password": getpass("Bugzilla password for {}: ".format(user)),
+                "Bugzilla_password": password,
             },
             json=False,
         )
