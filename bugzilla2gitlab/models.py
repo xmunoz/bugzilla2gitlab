@@ -271,7 +271,7 @@ class Issue:
             if int(self.id) != int(self.bug_id):
                 raise Exception(
                     "Issue id [{}]!=[{}]: missing  owner permission for gitlab user id {}".format(
-                    self.id, self.bug_id, self.sudo
+                        self.id, self.bug_id, self.sudo
                     )
                 )
         print("Created issue with id: {}".format(self.id))
