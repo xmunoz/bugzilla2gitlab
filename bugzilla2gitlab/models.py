@@ -173,14 +173,16 @@ class Issue:
             "Architecture", fields.get("rep_platform")
         )
 
+        deplist = ""
+        blocklist = ""
         if fields.get("dependson") is not None:
-            self.description += markdown_table_row(
-                "Depends On", "[{}]({})".format(fields.get("dependson"), link)
-            )
+            for depends in fields.get("dependson"):
+                deplist += "[{}]({}) ".format(depends, link)
+            self.description += markdown_table_row("Depends On", deplist)
         if fields.get("blocked") is not None:
-            self.description += markdown_table_row(
-                "Blocked by", "[{}]({})".format(fields.get("blocked"), link)
-            )
+            for blocked in fields.get("blocked"):
+                blocklist += "[{}]({}) ".format(blocked, link)
+            self.description += markdown_table_row("Blocked by", blocklist)
 
         # add first comment to the issue description
         attachments = []
