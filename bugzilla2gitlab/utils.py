@@ -111,22 +111,23 @@ def bugzilla_login(url, user, password):
     """
     Log in to Bugzilla as user, asking for password for a few times / untill success.
     """
-
-    if password is None:
-        password = getpass("Bugzilla password for {}: ".format(user))
-
     max_login_attempts = 3
     login_url = "{}/index.cgi".format(url)
     # CSRF protection bypass: GET, then POST
     _perform_request(login_url, "get", json=False)
     for attempt in range(max_login_attempts):
+        if password is None:
+            bugzilla_password = getpass("Bugzilla password for {}: ".format(user))
+        else:
+            bugzilla_password = password
+
         response = _perform_request(
             login_url,
             "post",
             headers={"Referer": login_url},
             data={
                 "Bugzilla_login": user,
-                "Bugzilla_password": password,
+                "Bugzilla_password": bugzilla_password,
             },
             json=False,
         )
