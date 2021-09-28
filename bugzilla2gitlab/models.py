@@ -173,6 +173,17 @@ class Issue:
             "Architecture", fields.get("rep_platform")
         )
 
+        deplist = ""
+        blocklist = ""
+        if fields.get("dependson"):
+            for depends in fields.get("dependson"):
+                deplist += "[{}]({}) ".format(depends, link)
+            self.description += markdown_table_row("Depends On", deplist)
+        if fields.get("blocked"):
+            for blocked in fields.get("blocked"):
+                blocklist += "[{}]({}) ".format(blocked, link)
+            self.description += markdown_table_row("Blocked by", blocklist)
+
         # add first comment to the issue description
         attachments = []
         to_delete = []
