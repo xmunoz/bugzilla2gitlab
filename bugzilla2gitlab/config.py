@@ -21,6 +21,7 @@ Config = namedtuple(
         "gitlab_users",
         "gitlab_misc_user",
         "default_gitlab_labels",
+        "show_datetime_in_comments",
         "datetime_format_string",
         "map_operating_system",
         "map_keywords",

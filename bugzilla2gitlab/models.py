@@ -310,13 +310,15 @@ class Comment:
         self.sudo = CONF.gitlab_users[CONF.bugzilla_users[fields["who"]]]
         # if unable to comment as the original user, put username in comment body
         self.created_at = format_utc(fields["bug_when"])
+        self.body = ""
         if CONF.bugzilla_users[fields["who"]] == CONF.gitlab_misc_user:
-            self.body = "By {} on {}\n\n".format(
-                fields["who"],
-                format_datetime(fields["bug_when"], CONF.datetime_format_string),
-            )
-        else:
-            self.body = format_datetime(fields["bug_when"], CONF.datetime_format_string)
+            self.body += "By {}".format(fields["who"])
+            if CONF.show_datetime_in_comments:
+              self.body += " on "
+            else:
+              self.body += "\n\n"
+        if CONF.show_datetime_in_comments:
+            self.body += format_datetime(fields["bug_when"], CONF.datetime_format_string)
             self.body += "\n\n"
 
         # if this comment is actually an attachment, upload the attachment and add the

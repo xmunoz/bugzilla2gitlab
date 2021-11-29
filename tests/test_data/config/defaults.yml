@@ -34,6 +34,9 @@ bugzilla_user:
 # if not empty, you will be prompted for password once upon script startup
 bugzilla_password:
 
+# Set to true to show datetime in every comment
+show_datetime_in_comments: true
+
 # The way to format datetime strings in the gitlab issue description and comment body.
 datetime_format_string: "%b %d, %Y %H:%M"
 
@@ -69,6 +72,7 @@ map_keywords: true
 keywords_to_skip:
     - "SKIPME"
     - "NOTHING"
+
 # Set to true to map bugzilla milestones to GitLab
 map_milestones: true
 
