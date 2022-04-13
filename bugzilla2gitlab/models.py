@@ -375,7 +375,7 @@ class Attachment:
         # Use real filename to store attachment but descriptive name for issue text
         if "Content-disposition" not in headers:
             raise Exception(
-                u"No file name returned for attachment {}".format(self.file_description)
+                "No file name returned for attachment {}".format(self.file_description)
             )
         # Content-disposition: application/zip; filename="mail_route.zip"
         regex = r"^.*; filename=\"(.*)\"$"
@@ -391,7 +391,7 @@ class Attachment:
     def parse_upload_link(self, attachment):
         if not (attachment and attachment["markdown"]):
             raise Exception(
-                u"No markdown returned for upload of attachment {}".format(
+                "No markdown returned for upload of attachment {}".format(
                     self.file_description
                 )
             )
@@ -431,7 +431,7 @@ class Attachment:
             else self.parse_upload_link(attachment)
         )
 
-        return u"[{}]({})".format(self.file_description, upload_link)
+        return "[{}]({})".format(self.file_description, upload_link)
 
 
 def validate_user(bugzilla_user):
