@@ -18,8 +18,12 @@ class Migrator:
                 self.conf.bugzilla_user,
                 self.conf.bugzilla_password,
             )
+
+        bug_migrated = True # assume true for now
         for bug in bug_list:
-            self.migrate_one(bug)
+            bug_migrated = self.migrate_one(bug)
+
+        return bug_migrated
 
     def migrate_one(self, bugzilla_bug_id):
         """
@@ -28,4 +32,10 @@ class Migrator:
         print("Migrating bug {}".format(bugzilla_bug_id))
         fields = get_bugzilla_bug(self.conf.bugzilla_base_url, bugzilla_bug_id)
         issue_thread = IssueThread(self.conf, fields)
-        issue_thread.save()
+
+        if(self.conf.gitlab_skip_pre_migrated_issues and issue_thread.preexists):
+            print("Bug {} already migrated".format(bugzilla_bug_id))
+            return False
+        else:
+            issue_thread.save()
+            return True

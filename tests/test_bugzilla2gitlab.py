@@ -64,6 +64,9 @@ def test_config(monkeypatch):
     # conf.gitlab_milestones is a dictionary
     assert isinstance(conf.gitlab_milestones, dict)
 
+    #conf.gitlab_skip_pre_migrated_issues is a boolean value
+    assert isinstance(conf.gitlab_skip_pre_migrated_issues, bool)
+
 
 def test_Migrator(monkeypatch):
     bug_id = 103
@@ -88,4 +91,9 @@ def test_Migrator(monkeypatch):
 
     # just test that it works without throwing any exceptions
     client = Migrator(os.path.join(TEST_DATA_PATH, "config"))
-    client.migrate([bug_id])
+    assert (True, client.migrate([bug_id]))
+
+    # Test that the same bug is skipped if it's attempted to migrate again
+    conf = bugzilla2gitlab.config.get_config(os.path.join(TEST_DATA_PATH, "config"))
+    if(conf.gitlab_skip_pre_migrated_issues is True):
+        assert (False, client.migrate([bug_id]))

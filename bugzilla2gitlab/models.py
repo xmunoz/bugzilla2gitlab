@@ -13,6 +13,7 @@ class IssueThread:
     def __init__(self, config, fields):
         global CONF
         CONF = config
+        self.preexists = False
         self.load_objects(fields)
 
     def load_objects(self, fields):
@@ -21,6 +22,14 @@ class IssueThread:
         If CONF.dry_run=False, then Attachments are created in GitLab in this step.
         """
         self.issue = Issue(fields)
+
+        """
+        If configured, check if the issue already exists
+        """
+        if(CONF.gitlab_skip_pre_migrated_issues is True and self.issue.find_issue()):
+            self.preexists = True
+            return
+
         self.comments = []
         """
         fields["long_desc"] gets peared down in Issue creation (above). This is because bugzilla
@@ -70,6 +79,30 @@ class Issue:
         validate_user(bugzilla_fields["reporter"])
         validate_user(bugzilla_fields["assigned_to"])
         self.load_fields(bugzilla_fields)
+
+    def find_issue(self):
+        url = "{}/issues?search{}&in=title".format(
+            CONF.gitlab_base_url, self.title,
+        )
+
+        data = {k: v for k, v in self.__dict__.items() if k in self.data_fields}
+
+        self.headers["sudo"] = self.sudo
+
+        response = _perform_request(
+            url,
+            "get",
+            headers=self.headers,
+            data=data,
+            json=True,
+            dry_run=CONF.dry_run,
+            verify=CONF.verify,
+        )
+
+        if(response and isinstance(response, list) and response[0] is not ""):
+            return True
+        else:
+            return False
 
     def load_fields(self, fields):
         self.title = fields["short_desc"]
