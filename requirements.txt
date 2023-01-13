@@ -2,4 +2,4 @@ defusedxml>=0.5.0
 pyaml>=17.12.1
 python-dateutil>=2.7.2
 pytz>=2018.4
-requests==2.28.1
+requests==2.28.2
