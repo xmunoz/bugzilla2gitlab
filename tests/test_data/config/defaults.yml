@@ -11,9 +11,9 @@ gitlab_base_url: "https://git.example.com/api/v4"
 verify: true
 
 # Auto-generate the issue id in Gitlab. If set to `true`, create a Gitlab issue with
-# the same id as the Bugzilla ticket number.  The group members which are 
+# the same id as the Bugzilla ticket number.  The group members which are
 # mapped in the user mappings need to be defined as project owners for this
-# to work properly. Otherwise the Gitlab API will silently ignore the `iid` setting 
+# to work properly. Otherwise the Gitlab API will silently ignore the `iid` setting
 # and fallback to the default behavior (i.e. auto-generate the issue id).
 use_bugzilla_id: false
 
@@ -76,3 +76,6 @@ map_milestones: true
 milestones_to_skip:
     - "---"
     - "UNKNOWN"
+
+# Set to true to skip pre-migrated issues
+gitlab_skip_pre_migrated_issues: true

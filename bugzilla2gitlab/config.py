@@ -32,6 +32,7 @@ Config = namedtuple(
         "include_bugzilla_link",
         "use_bugzilla_id",
         "verify",
+        "gitlab_skip_pre_migrated_issues",
     ],
 )
 
