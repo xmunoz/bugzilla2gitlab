@@ -272,6 +272,19 @@ class Issue:
             return
 
         self.id = response["iid"]
+
+        """
+        Check if created issue ID matches requested ID if
+        option to keep numbers is enabled. Otherwise things
+        can become quite messy
+        """
+        if CONF.use_bugzilla_id is True:
+            if int(self.id) != int(self.bug_id):
+                raise Exception(
+                    "Issue id [{}]!=[{}]: missing  owner permission for gitlab user id {}".format(
+                        self.id, self.bug_id, self.sudo
+                    )
+                )
         print("Created issue with id: {}".format(self.id))
 
     def close(self):
